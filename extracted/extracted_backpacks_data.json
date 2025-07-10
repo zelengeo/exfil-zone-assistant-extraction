@@ -1,0 +1,434 @@
+[
+  {
+    "sourceFile": "WarfareBackpack006.json",
+    "type": "WarfareBackpack006_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack006_C",
+    "displayName": "HyperTec StorageBag",
+    "icon": "Icon_SKM_Backpack_007_01_Jyg",
+    "subcategory": "Backpacks",
+    "rarity": "Epic",
+    "weight": 2.9,
+    "sizes": {
+      "X": 75,
+      "Y": 27,
+      "Z": 36
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpack007.json",
+    "type": "WarfareBackpack007_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack007_C",
+    "displayName": "G.N.J.Backpack",
+    "icon": "Icon_SKM_Backpack_006_01_Jyg",
+    "subcategory": "Backpacks",
+    "rarity": "Epic",
+    "weight": 2.7,
+    "sizes": {
+      "X": 58,
+      "Y": 26,
+      "Z": 36
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "back",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "bottom",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpackBase_3DRT.json",
+    "type": "WarfareBackpackBase_3DRT_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpackBase_3DRT_C",
+    "displayName": "3DRT",
+    "icon": "Icon_backpack_lv1_01",
+    "subcategory": "Backpacks",
+    "rarity": "Uncommon",
+    "weight": 1.1,
+    "sizes": {
+      "X": 48,
+      "Y": 22,
+      "Z": 30
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpackBase_EliteOps.json",
+    "type": "WarfareBackpackBase_EliteOps_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpackBase_EliteOps_C",
+    "displayName": "Elite Ops",
+    "icon": "Icon_backpack_lv2_green",
+    "subcategory": "Backpacks",
+    "rarity": "Rare",
+    "weight": 2,
+    "sizes": {
+      "X": 50,
+      "Y": 26,
+      "Z": 36
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "back",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "bottom",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpackBase_EliteOps_Green.json",
+    "type": "WarfareBackpackBase_EliteOps_Green_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpackBase_EliteOps_Green_C",
+    "displayName": "Elite Ops Green",
+    "icon": "Icon_backpack_lv2_01",
+    "subcategory": "Backpacks",
+    "rarity": "Rare",
+    "weight": 2,
+    "sizes": {
+      "X": 50,
+      "Y": 26,
+      "Z": 36
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "back",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "bottom",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpack_Odldos_Black.json",
+    "type": "WarfareBackpack_Odldos_Black_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack_Odldos_Black_C",
+    "displayName": "Odldos black Backpack",
+    "icon": "Icon_Backpack_010_01_Yyp",
+    "subcategory": "Backpacks",
+    "rarity": "Rare",
+    "weight": 1.75,
+    "sizes": {
+      "X": 51,
+      "Y": 20,
+      "Z": 37
+    },
+    "attachmentPoints": []
+  },
+  {
+    "sourceFile": "WarfareBackpack_Odldos_flower.json",
+    "type": "WarfareBackpack_Odldos_flower_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack_Odldos_flower_C",
+    "displayName": "Odldos flowers Backpack",
+    "icon": "Icon_Backpack_011_01_Yyp",
+    "subcategory": "Backpacks",
+    "rarity": "Rare",
+    "weight": 1.8,
+    "sizes": {
+      "X": 56,
+      "Y": 23,
+      "Z": 38
+    },
+    "attachmentPoints": []
+  },
+  {
+    "sourceFile": "WarfareBackpack_Robinson.json",
+    "type": "WarfareBackpack_Robinson_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack_Robinson_C",
+    "displayName": "Robinson BFM Backpack",
+    "icon": "Icon_Backpack_009_01_Yyp",
+    "subcategory": "Backpacks",
+    "rarity": "Epic",
+    "weight": 2.4,
+    "sizes": {
+      "X": 64,
+      "Y": 21,
+      "Z": 40
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "back",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'"
+        ]
+      },
+      {
+        "tag": "bottom",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      }
+    ]
+  },
+  {
+    "sourceFile": "WarfareBackpack_Rucksack.json",
+    "type": "WarfareBackpack_Rucksack_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack_Rucksack_C",
+    "displayName": "Vagrant Rucksack",
+    "icon": "Icon_backpack_rs",
+    "subcategory": "Backpacks",
+    "rarity": "Common",
+    "weight": 1.3,
+    "sizes": {
+      "X": 33,
+      "Y": 15,
+      "Z": 19
+    },
+    "attachmentPoints": []
+  },
+  {
+    "sourceFile": "WarfareBackpack_SportBag.json",
+    "type": "WarfareBackpack_SportBag_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WarfareBackpack_SportBag_C",
+    "displayName": "Sports Bag",
+    "icon": "Icon_backpack_lv1_sportbag",
+    "subcategory": "Backpacks",
+    "rarity": "Common",
+    "weight": 1.2,
+    "sizes": {
+      "X": 35,
+      "Y": 16,
+      "Z": 21
+    },
+    "attachmentPoints": []
+  },
+  {
+    "sourceFile": "WF_Backpack_6sh118.json",
+    "type": "WF_Backpack_6sh118_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/Backpack/WarfareBackpackBase.53",
+    "name": "Default__WF_Backpack_6sh118_C",
+    "displayName": "6sh118",
+    "icon": "Icon_backpack_lv3_01",
+    "subcategory": "Backpacks",
+    "rarity": "Epic",
+    "weight": 3.1,
+    "sizes": {
+      "X": 92,
+      "Y": 33,
+      "Z": 46
+    },
+    "attachmentPoints": [
+      {
+        "tag": "left",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'",
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'ContractorsPrimaryGun_C'",
+          "'ContractorsPumpActionShotgun_C'",
+          "'VestHolster_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareTecVest_C'"
+        ]
+      },
+      {
+        "tag": "left",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      },
+      {
+        "tag": "right",
+        "classes": [
+          "'WarfareHelmet_C'"
+        ]
+      }
+    ]
+  }
+]

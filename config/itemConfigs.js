@@ -1,11 +1,24 @@
 const {stringTable} = require("./stringTable")
+
+const rarityMap = {
+    "EWarfare_Quality::NewEnumerator0": "Common",
+    "EWarfare_Quality::NewEnumerator1": "Uncommon",
+    "EWarfare_Quality::NewEnumerator2": "Rare",
+    "EWarfare_Quality::NewEnumerator3": "Epic",
+    "EWarfare_Quality::NewEnumerator4": "Legendary",
+    "EWarfare_Quality::NewEnumerator5": "Ultimate",
+}
+
+
 const configBase = {
     baseDirectory: "D:/exfilzone_data/extracted/Exports/Contractors_Showdown/Content/Blueprints/GameModes/Warfare",
-    extractData: (element, fileName, subcategory) => {
+    extractData: (element, data, fileName, directory) => {
         const properties = element.Properties;
-        const info = properties.Info || properties.Info_0;
+        const info = properties["warfare Prop Info"] || properties.Info || properties.Info_0;
         const iconObjectPath = info["Icon_11_BA1E5C224783410CB10781B70CE5A463"].ObjectPath;
         const displayName = info["DisplayName_2_E87F8CE0471A0D0F627BBA9F7E5EE752"];
+        const rarity = info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"] ? rarityMap[info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"]] : null;
+        const subcategory = directory.substring(directory.lastIndexOf('/') + 1)
 
 
         return {
@@ -15,8 +28,8 @@ const configBase = {
             name: element.Name,
             displayName: displayName ? displayName.LocalizedString : null,
             icon: iconObjectPath ? iconObjectPath.substring(iconObjectPath.lastIndexOf('/') + 1).split('.')[0] : null,
-            subcategory: subcategory,
-            rarity: properties.Rarity || null,
+            subcategory,
+            rarity,
             weight: properties.Weight || null,
         }
     },
@@ -42,9 +55,9 @@ const itemConfigs = {
                 item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, fileName, subcategory) => {
+            extractData: (element, data, fileName, directory) => {
                 return {
-                    ...configBase.extractData(element, fileName, subcategory),
+                    ...configBase.extractData(element, data, fileName, directory),
                     capacity: properties.Capacity || null,
                     threshold: properties.Threshold || null,
                     consumptionSpeed: properties.ConsumptionSpeed || null,
@@ -63,7 +76,7 @@ const itemConfigs = {
                 name: itemData.displayName,
                 description: "",
                 category: 'provisions',
-                subcategory: ((itemData.subcategory === 'Biscuits') || (itemData.subcategory === 'RaspBerry')) ? "Food" : "Drinks",
+                subcategory: ((itemData.directory === 'Biscuits') || (itemData.directory === 'RaspBerry')) ? "Food" : "Drinks",
                 images: {
                     icon: `/images/items/food/${itemData.icon}.webp`,
                     thumbnail: `/images/items/food/${itemData.icon}.webp`,
@@ -89,6 +102,180 @@ const itemConfigs = {
         }
     },
 
+    backpacks: {
+        baseDirectory: configBase.baseDirectory + '/Backpack',
+        outputFile: 'extracted_backpacks_data.json',
+        finalOutputFile: 'backpacks.json',
+        category: 'gear',
+
+        // Extraction configuration
+        extraction: {
+            findElement: (data, fileName) => data.find(item =>
+                item.Type && item.Type.startsWith(fileName)
+            ),
+
+            extractData: (element, data, fileName, directory) => {
+                const extractedData = {
+                    ...configBase.extractData(element, data, fileName, directory),
+                    subcategory: "Backpacks",
+                    sizes: null
+                };
+
+
+                // Sizes
+                const backPackSizeObject = data.find(item =>
+                    item.Type && item.Type.startsWith('BackpackStorage_C')
+                )
+
+                if (backPackSizeObject?.Properties?.Bound) {
+                    extractedData.sizes = backPackSizeObject.Properties.Bound
+                }
+
+                // Attachment points
+                const attachmentPoints = data.filter(item => item.Type && item.Type.startsWith("BackpackAttachPoint_C")).map(item => {
+                    return {
+                        tag: item.Properties.Tag,
+                        classes: item.Properties?.AttachmentClasses.map(clas => clas.ObjectName.replace("BlueprintGeneratedClass", ""))
+                    }
+                })
+                extractedData.attachmentPoints = attachmentPoints;
+
+                // Defaults.
+                if (!extractedData.weight && extractedData.template.endsWith('WarfareBackpackBase.53')) {
+                    extractedData.weight = 2.0;
+                }
+                if (!extractedData.rarity && extractedData.template.endsWith('WarfareBackpackBase.53')) {
+                    extractedData.rarity = rarityMap["EWarfare_Quality::NewEnumerator0"];
+                }
+
+                return extractedData;
+            },
+        },
+
+        // Transformation configuration
+        transformation: {
+            generateId: (itemData) => {
+                let idBase;
+                if (itemData.sourceFile.includes("WarfareBackpackBase_")) {
+                    idBase = itemData.sourceFile.replace("WarfareBackpackBase_", "").replace(".json", "")
+                } else if (itemData.sourceFile.includes("WarfareBackpack_")) {
+                    idBase = itemData.sourceFile.replace("WarfareBackpack_", "").replace(".json", "")
+                } else if (itemData.sourceFile.includes("WF_Backpack_")) {
+                    idBase = itemData.sourceFile.replace("WF_Backpack_", "").replace(".json", "")
+                } else {
+                    idBase = itemData.displayName.indexOf(' ') !== -1 ? itemData.displayName.substring(0, itemData.displayName.indexOf(' ')) : itemData.displayName;
+                }
+
+                return `backpack_${idBase.replaceAll(".", "").toLowerCase()}`
+            },
+
+            mapToFinalFormat: (itemData) => {
+                const classNameMap = {
+                    'ContractorsPrimaryGun_C': 'PrimaryGun',
+                    'ContractorsPumpActionShotgun_C': 'Shotgun',
+                    'VestHolster_C': 'Holster',
+                    'WarfareTecVest_C': 'Vest',
+                    'WarfareHelmet_C': 'Helmet',
+                };
+
+                // 2. Group classes by their tag in an intermediate object.
+                const groupedByTag = itemData.attachmentPoints.reduce((acc, point) => {
+                    const {tag, classes} = point;
+
+                    // Initialize the array for this tag if it doesn't exist yet.
+                    if (!acc[tag]) {
+                        acc[tag] = [];
+                    }
+
+                    // Clean up and map class names, then add them to the corresponding tag.
+                    const mappedClasses = classes.map(c => {
+                        const cleanClassName = c.replace(/'/g, ''); // Remove single quotes
+                        return classNameMap[cleanClassName] || cleanClassName; // Use mapped name or original if not found
+                    });
+
+                    acc[tag].push(...mappedClasses);
+                    return acc;
+                }, {});
+
+                // 3. Process the grouped data to create the final, compact output.
+
+                // Remove duplicates from each tag's class list using a Set.
+                for (const tag in groupedByTag) {
+                    groupedByTag[tag] = [...new Set(groupedByTag[tag])];
+                }
+
+                // Check if 'left' and 'right' tags exist and have identical classes.
+                const leftClasses = groupedByTag.left;
+                const rightClasses = groupedByTag.right;
+
+                if (leftClasses && rightClasses) {
+                    // Sort arrays to ensure comparison is not affected by order.
+                    const sortedLeft = [...leftClasses].sort();
+                    const sortedRight = [...rightClasses].sort();
+
+                    // If they are identical, create a 'sides' tag and remove the originals.
+                    if (JSON.stringify(sortedLeft) === JSON.stringify(sortedRight)) {
+                        groupedByTag.sides = sortedLeft;
+                        delete groupedByTag.left;
+                        delete groupedByTag.right;
+                    }
+                }
+
+                // 4. Convert the processed object back into an array of objects.
+                const finalResult = Object.keys(groupedByTag).map(tag => ({
+                    tag: tag,
+                    types: groupedByTag[tag]
+                }));
+
+
+                //Hardcoded prices
+                const hardcodedPrices = {
+                    "backpack_hypertec": 200000,
+                    "backpack_gnjbackpack": 80000,
+                    "backpack_3drt": 20000,
+                    "backpack_eliteops": 40000,
+                    "backpack_eliteops_green": 40000,
+                    "backpack_odldos_black": 20000,
+                    "backpack_odldos_flower": 20000,
+                    "backpack_robinson": 60000,
+                    "backpack_rucksack": 1000,
+                    "backpack_sportbag": 1000,
+                    "backpack_6sh118": 300000
+                }
+
+
+                return {
+                    id: itemData.id,
+                    name: itemData.displayName,
+                    description: "",
+                    category: "gear",
+                    subcategory: itemData.subcategory,
+                    //TODO import images too...
+                    images: {
+                        icon: `/images/items/backpacks/${itemData.icon}.webp`,
+                        thumbnail: `/images/items/backpacks/${itemData.icon}.webp`,
+                        fullsize: `/images/items/backpacks/${itemData.icon}.webp`
+                    },
+                    stats: {
+                        price: itemData.price ?? hardcodedPrices[itemData.id] ?? 1000,
+                        weight: itemData.weight ?? 2,
+                        rarity: itemData.rarity ?? "Common",
+                        sizes: `${itemData.sizes.X}x${itemData.sizes.Y}x${itemData.sizes.Z}`,
+                        attachmentPoints: finalResult,
+                    },
+                    tips: ''
+                }
+            },
+
+            hardcodedValues: [],
+
+            requiredAttributes: [
+                ...configBase.requiredAttributes,
+                'stats.sizes', 'stats.attachmentPoints',
+            ]
+        }
+    },
+
     keys: {
         baseDirectory: configBase.baseDirectory + '/House',
         outputFile: 'extracted_key_data.json',
@@ -101,14 +288,18 @@ const itemConfigs = {
                 item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, fileName, subcategory) => {
-                const newSubcategory = subcategory.includes("Map1") ? "Suburb" : subcategory.includes("Map2") ? "Dam" : subcategory.includes("Map3") ? "Metro" : "Resort"
-                const extractedData = {
-                    ...configBase.extractData(element, fileName, subcategory),
-                    subcategory: newSubcategory,
-                };
+            extractData: (element, data, fileName, directory) => {
+                const newSubcategory = directory.includes("Map1") ? "Suburb" : directory.includes("Map2") ? "Dam" : directory.includes("Map3") ? "Metro" : "Resort"
+                const extractedData =
+                    {
+                        ...
+                            configBase.extractData(element, data, fileName, directory),
+                        subcategory:
+                        newSubcategory,
+                    }
+                ;
 
-                if (extractedData.sourceFile.startsWith("BP") ) {
+                if (extractedData.sourceFile.startsWith("BP")) {
                     return null
                 }
 
@@ -116,7 +307,7 @@ const itemConfigs = {
             }
         },
 
-        // Transformation configuration
+// Transformation configuration
         transformation: {
             generateId: (itemData) => {
                 const nameWithoutExt = itemData.sourceFile.substring(0, itemData.sourceFile.lastIndexOf('.'));
@@ -137,163 +328,171 @@ const itemConfigs = {
                 return `key_${id.toLowerCase()}`
             },
 
-            mapToFinalFormat: (itemData) => {
+            mapToFinalFormat:
+                (itemData) => {
 
-                //Build gameid
-                const nameWithoutExt = itemData.sourceFile.substring(0, itemData.sourceFile.lastIndexOf('.'));
-                const firstUnderscoreIndex = nameWithoutExt.indexOf('_');
-                if (firstUnderscoreIndex === -1) {
-                    return ''; // No underscores found.
-                }
-                // Find the second underscore, starting the search after the first one.
-                const secondUnderscoreIndex = nameWithoutExt.indexOf('_', firstUnderscoreIndex + 1);
-                if (secondUnderscoreIndex === -1) {
-                    return ''; // Only one underscore found.
-                }
-                // Return the part of the string after the second underscore.
-                const idBase = nameWithoutExt.substring(secondUnderscoreIndex + 1);
-
-                const maps = ["Suburb", "Dam", "Metro", "Resort"]
-
-                //Temp solution for value injecting (should find how to extract following values)
-                const tempGameId = {
-                    key_mall_campshop:  "card.map1.campshop",
-                    key_policeoffice_f2:  "card.map1.bear-police-f2",
-                    key_police_f1: "card.map1.bear-police-f1",
-                    key_westbunker: "card.map1.basementexit",
-                    key_mid_bunker: "card.map2.midbunker",
-                    key_factory_b: "card.map2.factory_1",
-                    key_factory_a1: "card.map2.factory_2",
-                    key_f3_factoryroom: "card.map3.FactoryRoom" ,
-
-                }
-                let gameId
-                if (tempGameId[itemData.id]) {
-                    gameId = tempGameId[itemData.id]
-                } else {
-                    gameId = `card.map${maps.indexOf(itemData.subcategory)+1}.${idBase.toLowerCase()}`
-                    if (!stringTable[gameId+"_name"]) {
-                        gameId = `card.map${maps.indexOf(itemData.subcategory)+1}.${idBase}`
+                    //Build gameid
+                    const nameWithoutExt = itemData.sourceFile.substring(0, itemData.sourceFile.lastIndexOf('.'));
+                    const firstUnderscoreIndex = nameWithoutExt.indexOf('_');
+                    if (firstUnderscoreIndex === -1) {
+                        return ''; // No underscores found.
                     }
-                }
+                    // Find the second underscore, starting the search after the first one.
+                    const secondUnderscoreIndex = nameWithoutExt.indexOf('_', firstUnderscoreIndex + 1);
+                    if (secondUnderscoreIndex === -1) {
+                        return ''; // Only one underscore found.
+                    }
+                    // Return the part of the string after the second underscore.
+                    const idBase = nameWithoutExt.substring(secondUnderscoreIndex + 1);
+
+                    const maps = ["Suburb", "Dam", "Metro", "Resort"]
+
+                    //Temp solution for value injecting (should find how to extract following values)
+                    const tempGameId = {
+                        key_mall_campshop: "card.map1.campshop",
+                        key_policeoffice_f2: "card.map1.bear-police-f2",
+                        key_police_f1: "card.map1.bear-police-f1",
+                        key_westbunker: "card.map1.basementexit",
+                        key_mid_bunker: "card.map2.midbunker",
+                        key_factory_b: "card.map2.factory_1",
+                        key_factory_a1: "card.map2.factory_2",
+                        key_f3_factoryroom: "card.map3.FactoryRoom",
+
+                    }
+                    let gameId
+                    if (tempGameId[itemData.id]) {
+                        gameId = tempGameId[itemData.id]
+                    } else {
+                        gameId = `card.map${maps.indexOf(itemData.subcategory) + 1}.${idBase.toLowerCase()}`
+                        if (!stringTable[gameId + "_name"]) {
+                            gameId = `card.map${maps.indexOf(itemData.subcategory) + 1}.${idBase}`
+                        }
+                    }
 
 
-                const hardcodedRarityMap = {
-                    key_highbuilding_shop: "Epic",
-                    key_mall_campshop: "Legendary",
-                    key_mall_chaneo: "Legendary",
-                    key_motel_201: "Rare",
-                    key_motel_206: "Rare",
-                    key_policeoffice_f2: "Legendary",
-                    key_police_f1: "Legendary",
-                    key_westbunker: "Epic",
-                    key_wyethfarm: "Rare",
-                    key_clifton_shop: "Epic",
-                    key_dam_station_east: "Epic",
-                    key_dam_station_west: "Epic",
-                    key_dockhouse: "Legendary",
-                    key_factory_a1: "Legendary",
-                    key_factory_b: "Legendary",
-                    key_mid_bunker: "Epic",
-                    key_datastorage: "Legendary",
-                    key_exitlock_f3_sewer: "Epic",
-                    key_exitlock_trainroad: "Epic",
-                    key_officerroom: "Legendary",
-                    key_operatingroom: "Epic",
-                    key_apartment: "Epic",
-                    key_bankf2: "Legendary",
-                    key_hospitalf2: "Rare",
-                    key_resorthotel: "Rare",
-                    key_tunnel: "Legendary",
-                    key_voyages: "Epic"
-                }
+                    const hardcodedRarityMap = {
+                        key_highbuilding_shop: "Epic",
+                        key_mall_campshop: "Legendary",
+                        key_mall_chaneo: "Legendary",
+                        key_motel_201: "Rare",
+                        key_motel_206: "Rare",
+                        key_policeoffice_f2: "Legendary",
+                        key_police_f1: "Legendary",
+                        key_westbunker: "Epic",
+                        key_wyethfarm: "Rare",
+                        key_clifton_shop: "Epic",
+                        key_dam_station_east: "Epic",
+                        key_dam_station_west: "Epic",
+                        key_dockhouse: "Legendary",
+                        key_factory_a1: "Legendary",
+                        key_factory_b: "Legendary",
+                        key_mid_bunker: "Epic",
+                        key_datastorage: "Legendary",
+                        key_exitlock_f3_sewer: "Epic",
+                        key_exitlock_trainroad: "Epic",
+                        key_officerroom: "Legendary",
+                        key_operatingroom: "Epic",
+                        key_apartment: "Epic",
+                        key_bankf2: "Legendary",
+                        key_hospitalf2: "Rare",
+                        key_resorthotel: "Rare",
+                        key_tunnel: "Legendary",
+                        key_voyages: "Epic"
+                    }
 
 
-
-                return {
-                    id: itemData.id,
-                    name: stringTable[gameId+"_name"],
-                    description: "",
-                    category: "keys",
-                    subcategory: itemData.subcategory,
-                    //TODO import images too...
-                    images: {
-                        icon: `/images/items/keys/${itemData.icon}.webp`,
-                        thumbnail: `/images/items/keys/${itemData.icon}.webp`,
-                        fullsize: `/images/items/keys/${itemData.icon}.webp`
-                    },
-                    stats: {
-                        price: itemData.price ?? 1000,
-                        weight: itemData.weight ?? 0.1,
-                        rarity: itemData.rarity ?? hardcodedRarityMap[itemData.id] ?? "Uncommon",
-                    },
-                    gameId,
-                    tips: ''
-                }
-            },
-
-            hardcodedValues: [
-                {
-                    "id": "key_bomb",
-                    "name": "Bomb",
-                    "description": "Used to demolish the wall of the control room.",
-                    "category": "keys",
-                    "subcategory": "Metro",
-                    "images": {
-                        "icon": "/images/items/keys/Icon_WF_Bomb.webp",
-                        "thumbnail": "/images/items/keys/Icon_WF_Bomb.webp",
-                        "fullsize": "/images/items/keys/Icon_WF_Bomb.webp"
-                    },
-                    "stats": {
-                        "price": 1000,
-                        "weight": 20,
-                        "rarity": "Common"
-                    },
-                    "tips": ""
+                    return {
+                        id: itemData.id,
+                        name: stringTable[gameId + "_name"],
+                        description: "",
+                        category: "keys",
+                        subcategory: itemData.subcategory,
+                        //TODO import images too...
+                        images: {
+                            icon: `/images/items/keys/${itemData.icon}.webp`,
+                            thumbnail: `/images/items/keys/${itemData.icon}.webp`,
+                            fullsize: `/images/items/keys/${itemData.icon}.webp`
+                        },
+                        stats: {
+                            price: itemData.price ?? 1000,
+                            weight: itemData.weight ?? 0.1,
+                            rarity: itemData.rarity ?? hardcodedRarityMap[itemData.id] ?? "Uncommon",
+                        },
+                        gameId,
+                        tips: ''
+                    }
                 },
-                {
-                    "id": "key_metro_entry_ticket",
-                    "name": "Metro Entry Ticket",
-                    "description": "",
-                    "category": "keys",
-                    "subcategory": "Metro",
-                    "images": {
-                        "icon": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
-                        "thumbnail": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
-                        "fullsize": "/images/items/keys/Icon_Metro_Entry_Ticket.webp"
-                    },
-                    "stats": {
-                        "price": 200000,
-                        "weight": 0.15,
-                        "rarity": "Legendary"
-                    },
-                    "tips": ""
-                }
-            ],
 
-            requiredAttributes: [
-                ...configBase.requiredAttributes,
-            ]
+            hardcodedValues:
+                [
+                    {
+                        "id": "key_bomb",
+                        "name": "Bomb",
+                        "description": "Used to demolish the wall of the control room.",
+                        "category": "keys",
+                        "subcategory": "Metro",
+                        "images": {
+                            "icon": "/images/items/keys/Icon_WF_Bomb.webp",
+                            "thumbnail": "/images/items/keys/Icon_WF_Bomb.webp",
+                            "fullsize": "/images/items/keys/Icon_WF_Bomb.webp"
+                        },
+                        "stats": {
+                            "price": 1000,
+                            "weight": 20,
+                            "rarity": "Common"
+                        },
+                        "tips": ""
+                    },
+                    {
+                        "id": "key_metro_entry_ticket",
+                        "name": "Metro Entry Ticket",
+                        "description": "",
+                        "category": "keys",
+                        "subcategory": "Metro",
+                        "images": {
+                            "icon": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
+                            "thumbnail": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
+                            "fullsize": "/images/items/keys/Icon_Metro_Entry_Ticket.webp"
+                        },
+                        "stats": {
+                            "price": 200000,
+                            "weight": 0.15,
+                            "rarity": "Legendary"
+                        },
+                        "tips": ""
+                    }
+                ],
+
+            requiredAttributes:
+                [
+                    ...configBase.requiredAttributes,
+                ]
         }
     },
 
-
-    // Add more item types here
+// Add more item types here
     weapons: {
         baseDirectory: './weapon-data',
-        outputFile: 'extracted_weapon_data.json',
-        finalOutputFile: 'weapons.json',
-        category: 'weapons',
+        outputFile:
+            'extracted_weapon_data.json',
+        finalOutputFile:
+            'weapons.json',
+        category:
+            'weapons',
         // ... weapon-specific configuration
-    },
+    }
+    ,
 
     ammo: {
         baseDirectory: './ammo-data',
-        outputFile: 'extracted_ammo_data.json',
-        finalOutputFile: 'ammo.json',
-        category: 'ammo',
+        outputFile:
+            'extracted_ammo_data.json',
+        finalOutputFile:
+            'ammo.json',
+        category:
+            'ammo',
         // ... ammo-specific configuration
     }
-};
+}
 
-module.exports = { itemConfigs };
+module.exports = {itemConfigs};

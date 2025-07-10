@@ -1,6 +1,47 @@
 const fs = require('fs');
 const path = require('path');
 
+function extractFromDirectory(extractedItems, directory, extraction) {
+
+    // Get all JSON files in this subcategory folder
+    const jsonFiles = fs.readdirSync(directory)
+        .filter(file => file.endsWith('.json'));
+
+    console.log(`Processing ${directory} with ${jsonFiles.length} items`);
+
+    for (const jsonFile of jsonFiles) {
+        const filePath = path.join(directory, jsonFile);
+        const fileName = path.basename(jsonFile, '.json');
+
+        try {
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const data = JSON.parse(fileContent);
+
+            // Use the configured element finder
+            const element = extraction.findElement(data, fileName);
+
+            if (element && element.Properties) {
+                // Use the configured data extractor
+                const itemData = extraction.extractData(element, data ,fileName, directory);
+
+                if (itemData) {
+                    extractedItems.push(itemData);
+                    console.log(`✓ Extracted: ${fileName} (${directory})`);
+                } else {
+                    console.log(`✓ Filtered out: ${fileName} (${directory})`);
+                }
+
+
+            } else {
+                console.log(`⚠ No matching element found in ${jsonFile} for type starting with "${fileName}"`);
+            }
+
+        } catch (error) {
+            console.error(`❌ Error processing ${jsonFile}:`, error.message);
+        }
+    }
+}
+
 class ExtractionEngine {
     constructor(config) {
         this.config = config;
@@ -11,56 +52,24 @@ class ExtractionEngine {
      */
     extractData() {
         const extractedItems = [];
-        const { baseDirectory, extraction } = this.config;
+        const { baseDirectory, extraction, isNested } = this.config;
 
         try {
-            // Get all subcategory folders (e.g., caliber folders, food type folders)
-            const subcategoryFolders = fs.readdirSync(baseDirectory, { withFileTypes: true })
-                .filter(dirent => dirent.isDirectory())
-                .map(dirent => dirent.name);
+            if (isNested) {
+                // Get all subcategory folders (e.g., caliber folders, food type folders)
+                const subcategoryFolders = fs.readdirSync(baseDirectory, { withFileTypes: true })
+                    .filter(dirent => dirent.isDirectory())
+                    .map(dirent => dirent.name);
 
-            console.log(`Found ${subcategoryFolders.length} ${this.config.category} subcategories:`, subcategoryFolders);
+                console.log(`Found ${subcategoryFolders.length} ${this.config.category} subcategories:`, subcategoryFolders);
 
-            for (const subcategory of subcategoryFolders) {
-                const subcategoryPath = path.join(baseDirectory, subcategory);
-
-                // Get all JSON files in this subcategory folder
-                const jsonFiles = fs.readdirSync(subcategoryPath)
-                    .filter(file => file.endsWith('.json'));
-
-                console.log(`Processing ${subcategory} with ${jsonFiles.length} items`);
-
-                for (const jsonFile of jsonFiles) {
-                    const filePath = path.join(subcategoryPath, jsonFile);
-                    const fileName = path.basename(jsonFile, '.json');
-
-                    try {
-                        const fileContent = fs.readFileSync(filePath, 'utf8');
-                        const data = JSON.parse(fileContent);
-
-                        // Use the configured element finder
-                        const element = extraction.findElement(data, fileName);
-
-                        if (element && element.Properties) {
-                            // Use the configured data extractor
-                            const itemData = extraction.extractData(element, fileName, subcategory);
-
-                            if (itemData) {
-                                extractedItems.push(itemData);
-                                console.log(`✓ Extracted: ${fileName} (${subcategory})`);
-                            } else {
-                                console.log(`✓ Filtered out: ${fileName} (${subcategory})`);
-                            }
-
-
-                        } else {
-                            console.log(`⚠ No matching element found in ${jsonFile} for type starting with "${fileName}"`);
-                        }
-
-                    } catch (error) {
-                        console.error(`❌ Error processing ${jsonFile}:`, error.message);
-                    }
+                for (const subcategory of subcategoryFolders) {
+                    const subcategoryPath = path.join(baseDirectory, subcategory);
+                    extractFromDirectory(extractedItems, subcategoryPath, extraction);
                 }
+            } else {
+                // Extract from Jsons in the current dir
+                extractFromDirectory(extractedItems, baseDirectory, extraction)
             }
 
             // Save the extracted data
