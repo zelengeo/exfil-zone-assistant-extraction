@@ -267,7 +267,7 @@
   },
   {
     "id": "key_factory_a1",
-    "name": "Factory B zone Key",
+    "name": "Factory A1 zone Key",
     "description": "",
     "category": "keys",
     "subcategory": "Dam",
@@ -281,12 +281,12 @@
       "weight": 0.1,
       "rarity": "Legendary"
     },
-    "gameId": "card.map2.factory_1",
+    "gameId": "card.map2.factory_2",
     "tips": ""
   },
   {
     "id": "key_factory_b",
-    "name": "Factory A1 zone Key",
+    "name": "Factory B zone Key",
     "description": "",
     "category": "keys",
     "subcategory": "Dam",
@@ -300,7 +300,7 @@
       "weight": 0.1,
       "rarity": "Legendary"
     },
-    "gameId": "card.map2.factory_2",
+    "gameId": "card.map2.factory_1",
     "tips": ""
   },
   {
@@ -608,7 +608,7 @@
   },
   {
     "id": "key_metro_entry_ticket",
-    "name": "Metro Entry Ticker",
+    "name": "Metro Entry Ticket",
     "description": "",
     "category": "keys",
     "subcategory": "Metro",

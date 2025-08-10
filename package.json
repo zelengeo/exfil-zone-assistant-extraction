@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "extract":  "node extractionCLI extract holsters",
-    "transform":  "node extractionCLI transform holsters",
-    "process": "node extractionCLI transform holsters"
+    "extract":  "node extractionCLI extract",
+    "transform":  "node extractionCLI transform",
+    "process": "node extractionCLI process"
   },
   "keywords": [],
   "author": "",

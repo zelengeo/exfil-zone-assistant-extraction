@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { applyManualOverrides } = require('../config/manualOverrides');
 
 function extractFromDirectory(extractedItems, directory, extraction) {
 
@@ -132,14 +133,17 @@ class ExtractionEngine {
             })
         }
 
+        // Apply manual overrides
+        const itemsWithOverrides = applyManualOverrides(this.config.itemType, transformedItems);
+
         // Save transformed data
         const outputPath = path.join('./extracted/', this.config.finalOutputFile);
-        fs.writeFileSync(outputPath, JSON.stringify(transformedItems, null, 2));
+        fs.writeFileSync(outputPath, JSON.stringify(itemsWithOverrides, null, 2));
 
-        console.log(`✅ Successfully transformed ${transformedItems.length} ${this.config.category} items`);
+        console.log(`✅ Successfully transformed ${itemsWithOverrides.length} ${this.config.itemType} items`);
         console.log(`📁 Output saved to: ${outputPath}`);
 
-        return transformedItems;
+        return itemsWithOverrides;
     }
 
     /**

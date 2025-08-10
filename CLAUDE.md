@@ -78,6 +78,7 @@ When working on this project, ignore these files/directories (add to `.claudeign
 
 2. **Configuration Phase**
     - Add configuration to `itemConfigs.js`
+    - Set the `itemType` field to match the key used in `config/manualOverrides.js`
     - Define extraction logic (`findElement`, `extractData`)
     - Define transformation logic (`generateId`, `mapToFinalFormat`)
     - Specify required attributes and validation rules
@@ -105,30 +106,38 @@ When working on this project, ignore these files/directories (add to `.claudeign
     - Review and update manual overrides as needed
     - Document significant changes
 
-### Manual Override System
+### Manual Override System ✅ IMPLEMENTED
 
-Manual overrides should be maintained in a separate configuration file that:
-- Persists across extractions
-- Is version-controlled
-- Can override or supplement extracted data
-- Supports field-level overrides (not just full item replacement)
+The manual override system is implemented in `config/manualOverrides.js` and provides:
+- Persistent overrides across extractions
+- Version-controlled override data
+- Field-level overrides using dot notation (e.g., `"stats.price": 5000`)
+- Complete item additions via `addItems` array
 
-Example structure:
+**Structure:**
 ```javascript
-{
-  "holsters": {
-    "holster_vest01": {
-      "stats.price": 5000,  // Override price
-      "description": "Custom description"  // Add missing field
-    }
+const manualOverrides = {
+  itemTypeName: {
+    fieldOverrides: {
+      "item_id": { 
+        "stats.price": 5000,          // Override nested field
+        "description": "New desc"     // Override top-level field
+      }
+    },
+    addItems: [
+      // Complete item objects that aren't found in extracted data
+      { id: "special_item", name: "Special Item", ... }
+    ]
   }
 }
 ```
 
+**Usage:** Overrides are automatically applied during transformation phase. The `itemType` field in `itemConfigs.js` must match the key used in `manualOverrides`.
+
 ## Development Tasks Priority
 
 ### High Priority
-1. Create manual override system
+1. ✅ Create manual override system - COMPLETED
 2. Implement version tracking system
 3. Complete food item extraction
 
@@ -148,7 +157,8 @@ Example structure:
 
 ### When modifying extraction logic:
 - Keep all configuration in `itemConfigs.js`
-- Don't hardcode values in the engine
+- Don't hardcode values in transformation functions - use `config/manualOverrides.js` instead
+- Set the `itemType` field to match the override key
 - Use descriptive variable names for clarity
 - Add comments for complex transformations
 - Validate data at both extraction and transformation stages

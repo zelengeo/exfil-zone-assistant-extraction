@@ -48,6 +48,7 @@ const itemConfigs = {
         outputFile: 'extracted_food_data.json',
         finalOutputFile: 'food.json',
         category: 'provisions',
+        itemType: 'provisions',
 
         // Extraction configuration
         extraction: {
@@ -107,6 +108,7 @@ const itemConfigs = {
         outputFile: 'extracted_holster_data.json',
         finalOutputFile: 'holsters.json',
         category: 'gear',
+        itemType: 'holsters',
 
         // Extraction configuration
         extraction: {
@@ -171,11 +173,6 @@ const itemConfigs = {
             },
 
             mapToFinalFormat: (itemData) => {
-                //TODO mb add what is possible to add there
-
-                //Hardcoded prices
-                const hardcodedPrices = {}
-
                 return {
                     id: itemData.id,
                     name: itemData.displayName,
@@ -188,7 +185,7 @@ const itemConfigs = {
                         fullsize: `/images/items/holsters/${itemData.icon}.webp`
                     },
                     stats: {
-                        price: itemData.price ?? hardcodedPrices[itemData.id] ?? 1000,
+                        price: itemData.price ?? 1000,
                         weight: itemData.weight ?? 2,
                         rarity: itemData.rarity ?? "Common",
                         canAttach: itemData.canAttach ? itemData.canAttach.map(item => "holster_" + item.toLowerCase()) : []
@@ -196,8 +193,6 @@ const itemConfigs = {
                     tips: ''
                 }
             },
-
-            hardcodedValues: [],
 
             requiredAttributes: [
                 ...configBase.requiredAttributes,
@@ -210,6 +205,7 @@ const itemConfigs = {
         outputFile: 'extracted_backpacks_data.json',
         finalOutputFile: 'backpacks.json',
         category: 'gear',
+        itemType: 'backpacks',
 
         // Extraction configuration
         extraction: {
@@ -330,37 +326,19 @@ const itemConfigs = {
                     types: groupedByTag[tag]
                 }));
 
-
-                //Hardcoded prices
-                const hardcodedPrices = {
-                    "backpack_hypertec": 200000,
-                    "backpack_gnjbackpack": 80000,
-                    "backpack_3drt": 20000,
-                    "backpack_eliteops": 40000,
-                    "backpack_eliteops_green": 40000,
-                    "backpack_odldos_black": 20000,
-                    "backpack_odldos_flower": 20000,
-                    "backpack_robinson": 60000,
-                    "backpack_rucksack": 1000,
-                    "backpack_sportbag": 1000,
-                    "backpack_6sh118": 300000
-                }
-
-
                 return {
                     id: itemData.id,
                     name: itemData.displayName,
                     description: "",
                     category: "gear",
                     subcategory: itemData.subcategory,
-                    //TODO import images too...
                     images: {
                         icon: `/images/items/backpacks/${itemData.icon}.webp`,
                         thumbnail: `/images/items/backpacks/${itemData.icon}.webp`,
                         fullsize: `/images/items/backpacks/${itemData.icon}.webp`
                     },
                     stats: {
-                        price: itemData.price ?? hardcodedPrices[itemData.id] ?? 1000,
+                        price: itemData.price ?? 1000,
                         weight: itemData.weight ?? 2,
                         rarity: itemData.rarity ?? "Common",
                         sizes: `${itemData.sizes.X}x${itemData.sizes.Y}x${itemData.sizes.Z}`,
@@ -369,8 +347,6 @@ const itemConfigs = {
                     tips: ''
                 }
             },
-
-            hardcodedValues: [],
 
             requiredAttributes: [
                 ...configBase.requiredAttributes,
@@ -384,6 +360,7 @@ const itemConfigs = {
         outputFile: 'extracted_key_data.json',
         finalOutputFile: 'keys.json',
         category: 'keys',
+        itemType: 'keys',
 
         // Extraction configuration
         extraction: {
@@ -473,44 +450,12 @@ const itemConfigs = {
                     }
 
 
-                    const hardcodedRarityMap = {
-                        key_highbuilding_shop: "Epic",
-                        key_mall_campshop: "Legendary",
-                        key_mall_chaneo: "Legendary",
-                        key_motel_201: "Rare",
-                        key_motel_206: "Rare",
-                        key_policeoffice_f2: "Legendary",
-                        key_police_f1: "Legendary",
-                        key_westbunker: "Epic",
-                        key_wyethfarm: "Rare",
-                        key_clifton_shop: "Epic",
-                        key_dam_station_east: "Epic",
-                        key_dam_station_west: "Epic",
-                        key_dockhouse: "Legendary",
-                        key_factory_a1: "Legendary",
-                        key_factory_b: "Legendary",
-                        key_mid_bunker: "Epic",
-                        key_datastorage: "Legendary",
-                        key_exitlock_f3_sewer: "Epic",
-                        key_exitlock_trainroad: "Epic",
-                        key_officerroom: "Legendary",
-                        key_operatingroom: "Epic",
-                        key_apartment: "Epic",
-                        key_bankf2: "Legendary",
-                        key_hospitalf2: "Rare",
-                        key_resorthotel: "Rare",
-                        key_tunnel: "Legendary",
-                        key_voyages: "Epic"
-                    }
-
-
                     return {
                         id: itemData.id,
                         name: stringTable[gameId + "_name"],
                         description: "",
                         category: "keys",
                         subcategory: itemData.subcategory,
-                        //TODO import images too...
                         images: {
                             icon: `/images/items/keys/${itemData.icon}.webp`,
                             thumbnail: `/images/items/keys/${itemData.icon}.webp`,
@@ -519,52 +464,12 @@ const itemConfigs = {
                         stats: {
                             price: itemData.price ?? 1000,
                             weight: itemData.weight ?? 0.1,
-                            rarity: itemData.rarity ?? hardcodedRarityMap[itemData.id] ?? "Uncommon",
+                            rarity: itemData.rarity ?? "Uncommon",
                         },
                         gameId,
                         tips: ''
                     }
                 },
-
-            hardcodedValues:
-                [
-                    {
-                        "id": "key_bomb",
-                        "name": "Bomb",
-                        "description": "Used to demolish the wall of the control room.",
-                        "category": "keys",
-                        "subcategory": "Metro",
-                        "images": {
-                            "icon": "/images/items/keys/Icon_WF_Bomb.webp",
-                            "thumbnail": "/images/items/keys/Icon_WF_Bomb.webp",
-                            "fullsize": "/images/items/keys/Icon_WF_Bomb.webp"
-                        },
-                        "stats": {
-                            "price": 1000,
-                            "weight": 20,
-                            "rarity": "Common"
-                        },
-                        "tips": ""
-                    },
-                    {
-                        "id": "key_metro_entry_ticket",
-                        "name": "Metro Entry Ticket",
-                        "description": "",
-                        "category": "keys",
-                        "subcategory": "Metro",
-                        "images": {
-                            "icon": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
-                            "thumbnail": "/images/items/keys/Icon_Metro_Entry_Ticket.webp",
-                            "fullsize": "/images/items/keys/Icon_Metro_Entry_Ticket.webp"
-                        },
-                        "stats": {
-                            "price": 200000,
-                            "weight": 0.15,
-                            "rarity": "Legendary"
-                        },
-                        "tips": ""
-                    }
-                ],
 
             requiredAttributes:
                 [
