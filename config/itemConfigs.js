@@ -102,6 +102,109 @@ const itemConfigs = {
         }
     },
 
+    holsters: {
+        baseDirectory: configBase.baseDirectory + '/TecVest',
+        outputFile: 'extracted_holster_data.json',
+        finalOutputFile: 'holsters.json',
+        category: 'gear',
+
+        // Extraction configuration
+        extraction: {
+            findElement: (data, fileName) => data.find(item =>
+                fileName.includes("VestHolster") && item.Type && item.Type.startsWith(fileName)
+            ),
+
+            extractData: (element, data, fileName, directory) => {
+                const extractedData = {
+                    ...configBase.extractData(element, data, fileName, directory),
+                    subcategory: "Holsters",
+                    content: null,
+                    canAttach: null
+                };
+
+                //content
+                let totalWidth = element.Properties.TotalWidth
+                if (!totalWidth && extractedData.template === "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50") {
+                    totalWidth = 3.1
+                }
+                if (totalWidth) {
+                    extractedData.content = element.Properties.PropInfo.map(prop => ({
+                        [prop.Key]: Math.floor(totalWidth/(prop.Value.HalfWidth_42_152E25204555C2CC1D55A79BE2F930F1*2))
+                    }))
+                }
+
+
+                //canAttach
+                if (element.Properties.AttachHolsterClass) {
+                    extractedData.canAttach = element.Properties.AttachHolsterClass.map(prop => {
+                        const lastPart = prop.Key.substring(prop.Key.lastIndexOf('.') + 1).replaceAll("'", "");
+
+                        // Remove the '_C' suffix if it exists.
+                        const withoutC = lastPart.endsWith('_C') ? lastPart.slice(0, -2) : lastPart;
+
+                        // Find the last '_' and get the substring after it.
+                        const assetName = withoutC.substring(withoutC.lastIndexOf('_') + 1);
+
+                        return assetName;
+                    })
+                }
+                
+
+
+                return extractedData;
+            },
+        },
+
+        // Transformation configuration
+        transformation: {
+            generateId: (itemData) => {
+                let idBase = itemData.sourceFile;
+                const lastPart = idBase.replace(".json", "").replaceAll("'", "");
+
+                // Remove the '_C' suffix if it exists.
+                const withoutC = lastPart.endsWith('_C') ? lastPart.slice(0, -2) : lastPart;
+
+                // Find the last '_' and get the substring after it.
+                const assetName = withoutC.substring(withoutC.lastIndexOf('_') + 1);
+
+                return `holster_${assetName.replaceAll(".", "").toLowerCase()}`
+            },
+
+            mapToFinalFormat: (itemData) => {
+                //TODO mb add what is possible to add there
+
+                //Hardcoded prices
+                const hardcodedPrices = {}
+
+                return {
+                    id: itemData.id,
+                    name: itemData.displayName,
+                    description: "",
+                    category: "gear",
+                    subcategory: itemData.subcategory,
+                    images: {
+                        icon: `/images/items/holsters/${itemData.icon}.webp`,
+                        thumbnail: `/images/items/holsters/${itemData.icon}.webp`,
+                        fullsize: `/images/items/holsters/${itemData.icon}.webp`
+                    },
+                    stats: {
+                        price: itemData.price ?? hardcodedPrices[itemData.id] ?? 1000,
+                        weight: itemData.weight ?? 2,
+                        rarity: itemData.rarity ?? "Common",
+                        canAttach: itemData.canAttach ? itemData.canAttach.map(item => "holster_" + item.toLowerCase()) : []
+                    },
+                    tips: ''
+                }
+            },
+
+            hardcodedValues: [],
+
+            requiredAttributes: [
+                ...configBase.requiredAttributes,
+            ]
+        }
+    },
+
     backpacks: {
         baseDirectory: configBase.baseDirectory + '/Backpack',
         outputFile: 'extracted_backpacks_data.json',

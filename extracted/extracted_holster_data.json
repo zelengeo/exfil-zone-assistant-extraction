@@ -1,0 +1,726 @@
+[
+  {
+    "sourceFile": "VestHolster_556Faster.json",
+    "type": "VestHolster_556Faster_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_556Faster_C",
+    "displayName": "Standard Faster Mag holster",
+    "icon": "Icon_vestholster_01",
+    "subcategory": "Holsters",
+    "rarity": "Common",
+    "weight": 0.07,
+    "content": [
+      {
+        "AKM_Clip": 1
+      },
+      {
+        "Bullets": 1
+      },
+      {
+        "Origin12_Clip": 1
+      },
+      {
+        "HK416_Clip": 1
+      },
+      {
+        "M40A5_Clip": 1
+      },
+      {
+        "M40A5_Clip_Short": 1
+      },
+      {
+        "XM5_Clip": 1
+      },
+      {
+        "EnergyBar": 1
+      },
+      {
+        "MP5A2_Clip": 1
+      },
+      {
+        "M92_Clip": 1
+      },
+      {
+        "KW1911_Clip": 1
+      },
+      {
+        "CZevo3_Clip": 1
+      },
+      {
+        "BX4_Clip": 1
+      },
+      {
+        "M16_Clip": 1
+      },
+      {
+        "M1928_Clip": 1
+      },
+      {
+        "Syringe": 1
+      },
+      {
+        "SyringePro": 1
+      },
+      {
+        "ar308_clip": 1
+      },
+      {
+        "P250_Clip": 1
+      },
+      {
+        "M3A1_Clip": 1
+      },
+      {
+        "Glock18c_Clip": 1
+      },
+      {
+        "seca17_clip": 1
+      },
+      {
+        "mp762_clip": 1
+      },
+      {
+        "545_clip": 1
+      },
+      {
+        "AKM_Clip_s": 1
+      },
+      {
+        "Mica": 1
+      },
+      {
+        "MP9_Clip": 1
+      },
+      {
+        "ump45_Clip": 1
+      },
+      {
+        "M16_Clip_c30": 1
+      },
+      {
+        "M16_Clip_p30": 1
+      },
+      {
+        "Chocolate": 1
+      },
+      {
+        "g3_clip": 1
+      },
+      {
+        "aug30clip": 1
+      },
+      {
+        "aug42clip": 1
+      },
+      {
+        "aug9_clip": 1
+      },
+      {
+        "g3_clip_10": 1
+      },
+      {
+        "g3_clip_30": 1
+      }
+    ],
+    "canAttach": [
+      "556Faster"
+    ]
+  },
+  {
+    "sourceFile": "VestHolster_Grenade.json",
+    "type": "VestHolster_Grenade_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_Grenade_C",
+    "displayName": "Grenade Holster",
+    "icon": "Icon_vestholster_02",
+    "subcategory": "Holsters",
+    "rarity": "Uncommon",
+    "weight": 0.12,
+    "content": [
+      {
+        "BrokenRestore": 1
+      },
+      {
+        "water": 1
+      },
+      {
+        "Chocolate": 2
+      },
+      {
+        "redbull": 1
+      },
+      {
+        "SyringePro": 0
+      },
+      {
+        "Syringe": 2
+      },
+      {
+        "bandage": 1
+      },
+      {
+        "smokingbang": 1
+      },
+      {
+        "flashbang": 1
+      },
+      {
+        "frag": 1
+      },
+      {
+        "Bullets": 3
+      },
+      {
+        "PainKiller": 1
+      },
+      {
+        "cola": 1
+      }
+    ],
+    "canAttach": null
+  },
+  {
+    "sourceFile": "VestHolster_MagD.json",
+    "type": "VestHolster_MagD_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_MagD_C",
+    "displayName": "General Pouch",
+    "icon": "Icon_VestHolster_MagD2",
+    "subcategory": "Holsters",
+    "rarity": "Uncommon",
+    "weight": 0.14,
+    "content": [
+      {
+        "AKM_Clip": 2
+      },
+      {
+        "Bullets": 2
+      },
+      {
+        "Origin12_Clip": 2
+      },
+      {
+        "HK416_Clip": 2
+      },
+      {
+        "M40A5_Clip": 2
+      },
+      {
+        "M40A5_Clip_Short": 2
+      },
+      {
+        "XM5_Clip": 2
+      },
+      {
+        "EnergyBar": 2
+      },
+      {
+        "MP5A2_Clip": 2
+      },
+      {
+        "M92_Clip": 2
+      },
+      {
+        "KW1911_Clip": 2
+      },
+      {
+        "CZevo3_Clip": 2
+      },
+      {
+        "BX4_Clip": 2
+      },
+      {
+        "M16_Clip": 2
+      },
+      {
+        "M1928_Clip": 2
+      },
+      {
+        "Syringe": 2
+      },
+      {
+        "SyringePro": 2
+      },
+      {
+        "ar308_clip": 2
+      },
+      {
+        "P250_Clip": 2
+      },
+      {
+        "M3A1_Clip": 2
+      },
+      {
+        "Glock18c_Clip": 2
+      },
+      {
+        "seca17_clip": 2
+      },
+      {
+        "mp762_clip": 2
+      },
+      {
+        "545_clip": 2
+      },
+      {
+        "AKM_Clip_s": 2
+      },
+      {
+        "Mica": 2
+      },
+      {
+        "MP9_Clip": 2
+      },
+      {
+        "ump45_Clip": 2
+      },
+      {
+        "M16_Clip_c30": 2
+      },
+      {
+        "M16_Clip_p30": 2
+      },
+      {
+        "water": 1
+      },
+      {
+        "redbull": 1
+      },
+      {
+        "AKM_Clip_q60": 1
+      },
+      {
+        "545p60_clip": 1
+      },
+      {
+        "Painkiller": 1
+      },
+      {
+        "SF60_Drum": 1
+      },
+      {
+        "Fal_Clip": 2
+      },
+      {
+        "cola": 1
+      },
+      {
+        "bandage": 1
+      },
+      {
+        "flashbang": 1
+      },
+      {
+        "frag": 1
+      },
+      {
+        "smokingbang": 1
+      },
+      {
+        "Chocolate": 2
+      },
+      {
+        "g3_clip": 2
+      },
+      {
+        "aug42clip": 2
+      },
+      {
+        "aug30clip": 2
+      },
+      {
+        "svt_clip": 2
+      },
+      {
+        "aug9_clip": 2
+      },
+      {
+        "g3_clip_10": 2
+      },
+      {
+        "g3_clip_30": 2
+      },
+      {
+        "BrokenRestore": 1
+      }
+    ],
+    "canAttach": null
+  },
+  {
+    "sourceFile": "VestHolster_MagL.json",
+    "type": "VestHolster_MagL_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_MagL_C",
+    "displayName": "Mag Pouch Large",
+    "icon": "Icon_vestholster_05",
+    "subcategory": "Holsters",
+    "rarity": "Rare",
+    "weight": 0.12,
+    "content": [
+      {
+        "AKM_Clip": 1
+      },
+      {
+        "Bullets": 1
+      },
+      {
+        "Origin12_Clip": 1
+      },
+      {
+        "HK416_Clip": 1
+      },
+      {
+        "M40A5_Clip": 1
+      },
+      {
+        "M40A5_Clip_Short": 1
+      },
+      {
+        "XM5_Clip": 1
+      },
+      {
+        "EnergyBar": 1
+      },
+      {
+        "MP5A2_Clip": 1
+      },
+      {
+        "M92_Clip": 1
+      },
+      {
+        "KW1911_Clip": 1
+      },
+      {
+        "CZevo3_Clip": 1
+      },
+      {
+        "BX4_Clip": 1
+      },
+      {
+        "M16_Clip": 1
+      },
+      {
+        "M1928_Clip": 1
+      },
+      {
+        "Syringe": 1
+      },
+      {
+        "SyringePro": 1
+      },
+      {
+        "ar308_clip": 1
+      },
+      {
+        "P250_Clip": 1
+      },
+      {
+        "M3A1_Clip": 1
+      },
+      {
+        "Glock18c_Clip": 1
+      },
+      {
+        "seca17_clip": 1
+      },
+      {
+        "mp762_clip": 1
+      },
+      {
+        "545_clip": 1
+      },
+      {
+        "AKM_Clip_s": 1
+      },
+      {
+        "Mica": 1
+      },
+      {
+        "MP9_Clip": 1
+      },
+      {
+        "ump45_Clip": 1
+      },
+      {
+        "M16_Clip_c30": 1
+      },
+      {
+        "M16_Clip_p30": 1
+      },
+      {
+        "SKS_Clip": 1
+      },
+      {
+        "Fal_Clip": 1
+      },
+      {
+        "Chocolate": 1
+      },
+      {
+        "g3_clip": 1
+      },
+      {
+        "aug30clip": 1
+      },
+      {
+        "aug42clip": 1
+      },
+      {
+        "svt_clip": 1
+      },
+      {
+        "aug9_clip": 1
+      },
+      {
+        "g3_clip_10": 1
+      },
+      {
+        "g3_clip_30": 1
+      }
+    ],
+    "canAttach": [
+      "MagM",
+      "MagS",
+      "MagL",
+      "Grenade"
+    ]
+  },
+  {
+    "sourceFile": "VestHolster_MagM.json",
+    "type": "VestHolster_MagM_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_MagM_C",
+    "displayName": "Mag Pouch Medium",
+    "icon": "Icon_vestholster_04",
+    "subcategory": "Holsters",
+    "rarity": "Uncommon",
+    "weight": 0.1,
+    "content": [
+      {
+        "AKM_Clip": 1
+      },
+      {
+        "Bullets": 1
+      },
+      {
+        "Origin12_Clip": 1
+      },
+      {
+        "HK416_Clip": 1
+      },
+      {
+        "M40A5_Clip": 1
+      },
+      {
+        "M40A5_Clip_Short": 1
+      },
+      {
+        "XM5_Clip": 1
+      },
+      {
+        "EnergyBar": 1
+      },
+      {
+        "MP5A2_Clip": 1
+      },
+      {
+        "M92_Clip": 1
+      },
+      {
+        "KW1911_Clip": 1
+      },
+      {
+        "CZevo3_Clip": 1
+      },
+      {
+        "BX4_Clip": 1
+      },
+      {
+        "M16_Clip": 1
+      },
+      {
+        "M1928_Clip": 1
+      },
+      {
+        "Syringe": 1
+      },
+      {
+        "SyringePro": 1
+      },
+      {
+        "ar308_clip": 1
+      },
+      {
+        "P250_Clip": 1
+      },
+      {
+        "M3A1_Clip": 1
+      },
+      {
+        "Glock18c_Clip": 1
+      },
+      {
+        "seca17_clip": 1
+      },
+      {
+        "mp762_clip": 1
+      },
+      {
+        "545_clip": 1
+      },
+      {
+        "AKM_Clip_s": 1
+      },
+      {
+        "Mica": 1
+      },
+      {
+        "MP9_Clip": 1
+      },
+      {
+        "ump45_Clip": 1
+      },
+      {
+        "M16_Clip_c30": 1
+      },
+      {
+        "M16_Clip_p30": 1
+      },
+      {
+        "Chocolate": 1
+      },
+      {
+        "g3_clip": 1
+      },
+      {
+        "aug30clip": 1
+      },
+      {
+        "aug42clip": 1
+      },
+      {
+        "aug9_clip": 1
+      },
+      {
+        "g3_clip_10": 1
+      },
+      {
+        "g3_clip_30": 1
+      }
+    ],
+    "canAttach": [
+      "MagM",
+      "MagS",
+      "Grenade"
+    ]
+  },
+  {
+    "sourceFile": "VestHolster_MagS.json",
+    "type": "VestHolster_MagS_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_MagS_C",
+    "displayName": "Mag Pouch Small",
+    "icon": "Icon_vestholster_06",
+    "subcategory": "Holsters",
+    "rarity": "Common",
+    "weight": 0.08,
+    "content": [
+      {
+        "Glock18c_Clip": 1
+      },
+      {
+        "M1928_Clip": 1
+      },
+      {
+        "Syringe": 1
+      },
+      {
+        "P250_Clip": 1
+      },
+      {
+        "M3A1_Clip": 1
+      },
+      {
+        "MP9_Clip": 1
+      },
+      {
+        "ump45_Clip": 1
+      },
+      {
+        "EnergyBar": 1
+      },
+      {
+        "MP5A2_Clip": 1
+      },
+      {
+        "M92_Clip": 1
+      },
+      {
+        "KW1911_Clip": 1
+      },
+      {
+        "CZevo3_Clip": 1
+      },
+      {
+        "BX4_Clip": 1
+      },
+      {
+        "aug9_clip": 1
+      }
+    ],
+    "canAttach": null
+  },
+  {
+    "sourceFile": "VestHolster_Water.json",
+    "type": "VestHolster_Water_C",
+    "template": "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50",
+    "name": "Default__VestHolster_Water_C",
+    "displayName": "Water Pouch",
+    "icon": "VestHolster_Water",
+    "subcategory": "Holsters",
+    "rarity": "Uncommon",
+    "weight": 0.17,
+    "content": [
+      {
+        "water_orange": 1
+      },
+      {
+        "water": 1
+      },
+      {
+        "redbull": 1
+      },
+      {
+        "Painkiller": 1
+      },
+      {
+        "SyringePro": 1
+      },
+      {
+        "Bullets": 1
+      },
+      {
+        "Syringe": 2
+      },
+      {
+        "EnergyBar": 2
+      },
+      {
+        "cola": 1
+      },
+      {
+        "bandage": 1
+      },
+      {
+        "flashbang": 1
+      },
+      {
+        "frag": 1
+      },
+      {
+        "smokingbang": 1
+      }
+    ],
+    "canAttach": null
+  }
+]
