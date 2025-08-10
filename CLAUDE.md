@@ -91,6 +91,8 @@ When working on this project, ignore these files/directories (add to `.claudeign
 
 4. **Integration Phase**
     - Add any manual overrides to `config/manualOverrides.js`
+    - Review extraction metadata for missing fields and processing issues
+    - Review transformation metadata for unused overrides
     - Document special cases or edge cases
     - Update this file with implementation status
 
@@ -157,24 +159,96 @@ const manualOverrides = {
 
 **Usage:** Overrides are automatically applied during transformation phase. The `itemType` field in `itemConfigs.js` must match the key used in `manualOverrides`.
 
+### Enhanced Metadata System ✅ IMPLEMENTED
+
+Both extraction and transformation phases now include comprehensive metadata for tracking data quality and processing statistics.
+
+**Extraction Metadata:**
+```json
+{
+  "metadata": {
+    "version": "1.1.0-enhanced",
+    "extractedAt": "2025-08-10T13:21:41.573Z",
+    "itemType": "backpacks",
+    "itemCount": 11,
+    "gameDataPath": "D:/path/to/game/data",
+    "processingStats": {
+      "filesProcessed": 26,
+      "filesSkipped": [{"file": "file.json", "reason": "No matching element", "directory": "Backpack"}],
+      "extractionErrors": [{"file": "file.json", "message": "Error details", "directory": "Backpack"}],
+      "validationWarnings": [...]
+    },
+    "extractionStats": {
+      "itemsWithMissingFields": 3,
+      "missingFieldDetails": {
+        "weight": ["item1", "item2"],
+        "rarity": ["item3"]
+      },
+      "defaultsApplied": {
+        "weight": ["item1", "item2"]
+      }
+    }
+  }
+}
+```
+
+**Transformation Metadata:**
+```json
+{
+  "metadata": {
+    "processingStats": {
+      "itemsProcessed": 11,
+      "transformationErrors": [],
+      "validationWarnings": []
+    },
+    "transformationStats": {
+      "fieldsOverridden": 11,
+      "itemsOverridden": 11,
+      "itemsAdded": 0,
+      "unusedOverrides": ["item_that_doesnt_exist"]
+    }
+  }
+}
+```
+
+**Key Benefits:**
+- **Missing Field Tracking**: Detect when game data structure changes
+- **Default Application Tracking**: Know exactly which items use fallback values
+- **Processing Diagnostics**: Detailed error and warning tracking
+- **Override Usage Analysis**: Identify unused manual overrides
+- **Version Comparison Ready**: Rich metadata for comparing game updates
+
+**Usage Examples:**
+```bash
+# Check extraction metadata for data quality issues
+node extractionCLI.js extract backpacks --version game-v1.2.3
+# Review missingFieldDetails and defaultsApplied sections
+
+# Check transformation metadata for override efficiency
+node extractionCLI.js transform backpacks --version game-v1.2.3
+# Review unusedOverrides to clean up manualOverrides.js
+
+# Full pipeline with comprehensive metadata
+node extractionCLI.js process backpacks --version game-v1.2.3
+```
+
 ## Development Tasks Priority
 
 ### High Priority
 1. ✅ Create manual override system - COMPLETED
 2. ✅ Implement version tracking system - COMPLETED
-3. Complete food item extraction
+3. ✅ Enhanced metadata system (missing fields, processing stats) - COMPLETED
+4. Implement armor extraction
 
 ### Medium Priority
-1. Implement weapons extraction
-2. Implement ammo extraction
-3. Create version comparison tool
-4. Add data validation layer
+1. Implement remaining extraction
+2. Create version comparison tool
+3. Add data validation layer
 
 ### Low Priority
-1. Implement remaining item types
-2. Add automated testing
-3. Create data visualization tools
-4. Add export formats (CSV, Excel)
+1. Add automated testing
+2. Create data visualization tools
+3. Add export formats (CSV, Excel)
 
 ## Code Standards
 

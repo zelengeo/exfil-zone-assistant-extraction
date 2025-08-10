@@ -150,18 +150,29 @@ function applyFieldOverride(item, overridePath, value) {
     current[lastPart] = value;
 }
 
-function applyManualOverrides(itemType, transformedItems) {
+function applyManualOverrides(itemType, transformedItems, stats) {
     if (!manualOverrides[itemType]) {
         return transformedItems;
     }
     
     const { fieldOverrides, addItems } = manualOverrides[itemType];
     
+    // Create a set of existing item IDs for quick lookup
+    const existingItemIds = new Set(transformedItems.map(item => item.id));
+    
+    // Track override usage
+    const usedOverrides = new Set();
+    
     // Apply field overrides to existing items
     const modifiedItems = transformedItems.map(item => {
         if (fieldOverrides[item.id]) {
+            usedOverrides.add(item.id);
             const overrides = fieldOverrides[item.id];
             const modifiedItem = JSON.parse(JSON.stringify(item)); // Deep copy
+            
+            // Track stats
+            stats.itemsOverridden++;
+            stats.fieldsOverridden += Object.keys(overrides).length;
             
             Object.entries(overrides).forEach(([path, value]) => {
                 applyFieldOverride(modifiedItem, path, value);
@@ -171,6 +182,16 @@ function applyManualOverrides(itemType, transformedItems) {
         }
         return item;
     });
+    
+    // Find unused overrides and track them
+    Object.keys(fieldOverrides).forEach(itemId => {
+        if (!existingItemIds.has(itemId)) {
+            stats.unusedOverrides.push(itemId);
+        }
+    });
+    
+    // Track added items
+    stats.itemsAdded = addItems.length;
     
     // Add additional items
     return [...modifiedItems, ...addItems];

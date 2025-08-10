@@ -79,7 +79,6 @@ class ExtractionEngine {
     extractData() {
         const extractedItems = [];
         const { baseDirectory, extraction, isNested } = this.config;
-        const startTime = Date.now();
         
         // Initialize processing statistics
         const stats = {
@@ -108,9 +107,6 @@ class ExtractionEngine {
                 // Extract from Jsons in the current dir
                 extractFromDirectory(extractedItems, baseDirectory, extraction, stats)
             }
-
-            // Calculate processing time
-            const processingTime = ((Date.now() - startTime) / 1000).toFixed(2) + 's';
             
             // Create versioned output with metadata
             const versionedData = {
@@ -125,7 +121,6 @@ class ExtractionEngine {
                         filesSkipped: stats.filesSkipped,
                         extractionErrors: stats.errors,
                         validationWarnings: stats.warnings,
-                        processingTime: processingTime
                     },
                     extractionStats: {
                         itemsWithMissingFields: Object.keys(stats.missingFields).length,
@@ -157,6 +152,20 @@ class ExtractionEngine {
      * Transform extracted data into final format
      */
     transformData(extractedData = null) {
+        // Initialize processing and transformation statistics
+        const stats = {
+            // Processing stats
+            itemsProcessed: 0,
+            transformationErrors: [],
+            validationWarnings: [],
+            
+            // Transformation stats  
+            fieldsOverridden: 0,
+            itemsOverridden: 0,
+            itemsAdded: 0,
+            unusedOverrides: []
+        };
+        
         // Load extracted data if not provided
         if (!extractedData) {
             try {
@@ -182,6 +191,8 @@ class ExtractionEngine {
         console.log(`🔄 Starting ${this.config.category} data transformation...`);
 
         extractedData.forEach(itemData => {
+            stats.itemsProcessed++;
+            
             try {
                 // Generate ID using configured method
                 const id = transformation.generateId(itemData);
@@ -191,12 +202,17 @@ class ExtractionEngine {
                 const transformedItem = transformation.mapToFinalFormat(itemData);
 
                 // Validate required attributes
-                if (this.validateAttributes(transformedItem, transformation.requiredAttributes)) {
+                if (this.validateAttributes(transformedItem, transformation.requiredAttributes, stats)) {
                     transformedItems.push(transformedItem);
                 }
 
             } catch (error) {
-                console.error(`❌ Error transforming item ${itemData.name || 'unknown'}:`, error.message);
+                const errorMsg = `Error transforming item ${itemData.name || 'unknown'}: ${error.message}`;
+                console.error(`❌ ${errorMsg}`);
+                stats.transformationErrors.push({
+                    item: itemData.name || itemData.id || 'unknown',
+                    message: error.message
+                });
             }
         });
 
@@ -207,7 +223,7 @@ class ExtractionEngine {
         }
 
         // Apply manual overrides
-        const itemsWithOverrides = applyManualOverrides(this.config.itemType, transformedItems);
+        const itemsWithOverrides = applyManualOverrides(this.config.itemType, transformedItems, stats);
 
         // Create versioned output with metadata
         const finalData = {
@@ -217,10 +233,17 @@ class ExtractionEngine {
                 itemType: this.config.itemType,
                 itemCount: itemsWithOverrides.length,
                 gameDataPath: this.config.baseDirectory,
-                manualOverrides: itemsWithOverrides.length - transformedItems.length + 
-                    transformedItems.filter((item, index) => 
-                        JSON.stringify(item) !== JSON.stringify(itemsWithOverrides[index] || {})
-                    ).length
+                processingStats: {
+                    itemsProcessed: stats.itemsProcessed,
+                    transformationErrors: stats.transformationErrors,
+                    validationWarnings: stats.validationWarnings
+                },
+                transformationStats: {
+                    fieldsOverridden: stats.fieldsOverridden,
+                    itemsOverridden: stats.itemsOverridden,
+                    itemsAdded: stats.itemsAdded,
+                    unusedOverrides: stats.unusedOverrides
+                }
             },
             items: itemsWithOverrides
         };
@@ -241,7 +264,7 @@ class ExtractionEngine {
     /**
      * Validate that all required attributes are present
      */
-    validateAttributes(item, requiredAttributes) {
+    validateAttributes(item, requiredAttributes, stats = null) {
         let isValid = true;
 
         for (const attributePath of requiredAttributes) {
@@ -250,7 +273,14 @@ class ExtractionEngine {
 
             for (const part of pathParts) {
                 if (current === null || typeof current !== 'object' || !(part in current)) {
-                    console.log(`Missing attribute for item ID: ${item.id || 'N/A'}, missing path: ${attributePath}`);
+                    const warningMsg = `Missing attribute for item ID: ${item.id || 'N/A'}, missing path: ${attributePath}`;
+                    console.log(`⚠ ${warningMsg}`);
+                    if (stats) {
+                        stats.validationWarnings.push({
+                            item: item.id || 'N/A',
+                            message: `Missing path: ${attributePath}`
+                        });
+                    }
                     isValid = false;
                     break;
                 }
@@ -258,7 +288,14 @@ class ExtractionEngine {
             }
 
             if (current === undefined) {
-                console.log(`Undefined attribute for item ID: ${item.id || 'N/A'}, attribute: ${attributePath}`);
+                const warningMsg = `Undefined attribute for item ID: ${item.id || 'N/A'}, attribute: ${attributePath}`;
+                console.log(`⚠ ${warningMsg}`);
+                if (stats) {
+                    stats.validationWarnings.push({
+                        item: item.id || 'N/A',
+                        message: `Undefined attribute: ${attributePath}`
+                    });
+                }
                 isValid = false;
             }
         }
