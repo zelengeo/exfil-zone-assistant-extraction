@@ -1,0 +1,6 @@
+extracted/
+transformed/
+collectedData/
+node_modules/
+config/stringTable.js
+*.log
