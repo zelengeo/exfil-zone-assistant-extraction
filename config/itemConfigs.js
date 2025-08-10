@@ -12,14 +12,42 @@ const rarityMap = {
 
 const configBase = {
     baseDirectory: "D:/exfilzone_data/extracted/Exports/Contractors_Showdown/Content/Blueprints/GameModes/Warfare",
-    extractData: (element, data, fileName, directory) => {
+    extractData: (element, data, fileName, directory, stats) => {
         const properties = element.Properties;
         const info = properties["warfare Prop Info"] || properties.Info || properties.Info_0;
-        const iconObjectPath = info["Icon_11_BA1E5C224783410CB10781B70CE5A463"].ObjectPath;
+        const itemId = fileName;
+        
+        // Track missing fields and defaults
+        const trackMissing = (field, value, itemId) => {
+            if (!value) {
+                if (!stats.missingFields[field]) {
+                    stats.missingFields[field] = [];
+                }
+                stats.missingFields[field].push(itemId);
+            }
+        };
+        
+        const trackDefault = (field, value, defaultValue, itemId) => {
+            if (!value) {
+                if (!stats.defaultsApplied[field]) {
+                    stats.defaultsApplied[field] = [];
+                }
+                stats.defaultsApplied[field].push(itemId);
+                return defaultValue;
+            }
+            return value;
+        };
+        
+        const iconObjectPath = info["Icon_11_BA1E5C224783410CB10781B70CE5A463"]?.ObjectPath;
         const displayName = info["DisplayName_2_E87F8CE0471A0D0F627BBA9F7E5EE752"];
         const rarity = info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"] ? rarityMap[info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"]] : null;
-        const subcategory = directory.substring(directory.lastIndexOf('/') + 1)
-
+        const subcategory = directory.substring(directory.lastIndexOf('/') + 1);
+        
+        // Track missing fields
+        trackMissing('icon', iconObjectPath, itemId);
+        trackMissing('displayName', displayName, itemId);
+        trackMissing('rarity', rarity, itemId);
+        trackMissing('weight', properties.Weight, itemId);
 
         return {
             sourceFile: `${fileName}.json`,
@@ -56,9 +84,34 @@ const itemConfigs = {
                 item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, data, fileName, directory) => {
+            extractData: (element, data, fileName, directory, stats) => {
+                const properties = element.Properties;
+                const itemId = fileName;
+                
+                // Track missing fields for food-specific properties
+                if (!properties.Capacity) {
+                    if (!stats.missingFields['capacity']) stats.missingFields['capacity'] = [];
+                    stats.missingFields['capacity'].push(itemId);
+                }
+                if (!properties.Threshold) {
+                    if (!stats.missingFields['threshold']) stats.missingFields['threshold'] = [];
+                    stats.missingFields['threshold'].push(itemId);
+                }
+                if (!properties.ConsumptionSpeed) {
+                    if (!stats.missingFields['consumptionSpeed']) stats.missingFields['consumptionSpeed'] = [];
+                    stats.missingFields['consumptionSpeed'].push(itemId);
+                }
+                if (!properties.EnergyFractor) {
+                    if (!stats.missingFields['energyFactor']) stats.missingFields['energyFactor'] = [];
+                    stats.missingFields['energyFactor'].push(itemId);
+                }
+                if (!properties.HydraFractor) {
+                    if (!stats.missingFields['hydraFactor']) stats.missingFields['hydraFactor'] = [];
+                    stats.missingFields['hydraFactor'].push(itemId);
+                }
+                
                 return {
-                    ...configBase.extractData(element, data, fileName, directory),
+                    ...configBase.extractData(element, data, fileName, directory, stats),
                     capacity: properties.Capacity || null,
                     threshold: properties.Threshold || null,
                     consumptionSpeed: properties.ConsumptionSpeed || null,
@@ -116,25 +169,33 @@ const itemConfigs = {
                 fileName.includes("VestHolster") && item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, data, fileName, directory) => {
+            extractData: (element, data, fileName, directory, stats) => {
                 const extractedData = {
-                    ...configBase.extractData(element, data, fileName, directory),
+                    ...configBase.extractData(element, data, fileName, directory, stats),
                     subcategory: "Holsters",
                     content: null,
                     canAttach: null
                 };
 
+                const itemId = fileName;
+
                 //content
                 let totalWidth = element.Properties.TotalWidth
                 if (!totalWidth && extractedData.template === "Contractors_Showdown/Content/Blueprints/GameModes/Warfare/TecVest/VestHolster.50") {
-                    totalWidth = 3.1
+                    totalWidth = 3.1;
+                    // Track default applied
+                    if (!stats.defaultsApplied['totalWidth']) stats.defaultsApplied['totalWidth'] = [];
+                    stats.defaultsApplied['totalWidth'].push(itemId);
                 }
                 if (totalWidth) {
                     extractedData.content = element.Properties.PropInfo.map(prop => ({
                         [prop.Key]: Math.floor(totalWidth/(prop.Value.HalfWidth_42_152E25204555C2CC1D55A79BE2F930F1*2))
                     }))
+                } else {
+                    // Track missing totalWidth
+                    if (!stats.missingFields['totalWidth']) stats.missingFields['totalWidth'] = [];
+                    stats.missingFields['totalWidth'].push(itemId);
                 }
-
 
                 //canAttach
                 if (element.Properties.AttachHolsterClass) {
@@ -149,9 +210,11 @@ const itemConfigs = {
 
                         return assetName;
                     })
+                } else {
+                    // Track missing canAttach
+                    if (!stats.missingFields['canAttach']) stats.missingFields['canAttach'] = [];
+                    stats.missingFields['canAttach'].push(itemId);
                 }
-                
-
 
                 return extractedData;
             },
@@ -213,13 +276,14 @@ const itemConfigs = {
                 item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, data, fileName, directory) => {
+            extractData: (element, data, fileName, directory, stats) => {
                 const extractedData = {
-                    ...configBase.extractData(element, data, fileName, directory),
+                    ...configBase.extractData(element, data, fileName, directory, stats),
                     subcategory: "Backpacks",
                     sizes: null
                 };
 
+                const itemId = fileName;
 
                 // Sizes
                 const backPackSizeObject = data.find(item =>
@@ -228,6 +292,12 @@ const itemConfigs = {
 
                 if (backPackSizeObject?.Properties?.Bound) {
                     extractedData.sizes = backPackSizeObject.Properties.Bound
+                } else {
+                    // Track missing sizes
+                    if (!stats.missingFields['sizes']) {
+                        stats.missingFields['sizes'] = [];
+                    }
+                    stats.missingFields['sizes'].push(itemId);
                 }
 
                 // Attachment points
@@ -239,12 +309,20 @@ const itemConfigs = {
                 })
                 extractedData.attachmentPoints = attachmentPoints;
 
-                // Defaults.
+                // Defaults - track when we apply them
                 if (!extractedData.weight && extractedData.template.endsWith('WarfareBackpackBase.53')) {
                     extractedData.weight = 2.0;
+                    if (!stats.defaultsApplied['weight']) {
+                        stats.defaultsApplied['weight'] = [];
+                    }
+                    stats.defaultsApplied['weight'].push(itemId);
                 }
                 if (!extractedData.rarity && extractedData.template.endsWith('WarfareBackpackBase.53')) {
                     extractedData.rarity = rarityMap["EWarfare_Quality::NewEnumerator0"];
+                    if (!stats.defaultsApplied['rarity']) {
+                        stats.defaultsApplied['rarity'] = [];
+                    }
+                    stats.defaultsApplied['rarity'].push(itemId);
                 }
 
                 return extractedData;
@@ -368,12 +446,12 @@ const itemConfigs = {
                 item.Type && item.Type.startsWith(fileName)
             ),
 
-            extractData: (element, data, fileName, directory) => {
+            extractData: (element, data, fileName, directory, stats) => {
                 const newSubcategory = directory.includes("Map1") ? "Suburb" : directory.includes("Map2") ? "Dam" : directory.includes("Map3") ? "Metro" : "Resort"
                 const extractedData =
                     {
                         ...
-                            configBase.extractData(element, data, fileName, directory),
+                            configBase.extractData(element, data, fileName, directory, stats),
                         subcategory:
                         newSubcategory,
                     }

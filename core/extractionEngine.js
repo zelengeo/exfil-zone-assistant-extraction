@@ -3,7 +3,7 @@ const path = require('path');
 const { applyManualOverrides } = require('../config/manualOverrides');
 const { current: defaultVersion } = require('../config/version');
 
-function extractFromDirectory(extractedItems, directory, extraction) {
+function extractFromDirectory(extractedItems, directory, extraction, stats) {
 
     // Get all JSON files in this subcategory folder
     const jsonFiles = fs.readdirSync(directory)
@@ -15,6 +15,8 @@ function extractFromDirectory(extractedItems, directory, extraction) {
         const filePath = path.join(directory, jsonFile);
         const fileName = path.basename(jsonFile, '.json');
 
+        stats.filesProcessed++;
+
         try {
             const fileContent = fs.readFileSync(filePath, 'utf8');
             const data = JSON.parse(fileContent);
@@ -23,23 +25,44 @@ function extractFromDirectory(extractedItems, directory, extraction) {
             const element = extraction.findElement(data, fileName);
 
             if (element && element.Properties) {
-                // Use the configured data extractor
-                const itemData = extraction.extractData(element, data ,fileName, directory);
+                // Use the configured data extractor with stats tracking
+                const itemData = extraction.extractData(element, data, fileName, directory, stats);
 
                 if (itemData) {
                     extractedItems.push(itemData);
                     console.log(`✓ Extracted: ${fileName} (${directory})`);
                 } else {
                     console.log(`✓ Filtered out: ${fileName} (${directory})`);
+                    stats.filesSkipped.push({
+                        file: jsonFile,
+                        reason: "Filtered by extraction logic",
+                        directory: directory.substring(directory.lastIndexOf('/') + 1)
+                    });
                 }
 
-
             } else {
-                console.log(`⚠ No matching element found in ${jsonFile} for type starting with "${fileName}"`);
+                const warningMsg = `No matching element found in ${jsonFile} for type starting with "${fileName}"`;
+                console.log(`⚠ ${warningMsg}`);
+                stats.warnings.push({
+                    file: jsonFile,
+                    message: warningMsg,
+                    directory: directory.substring(directory.lastIndexOf('/') + 1)
+                });
+                stats.filesSkipped.push({
+                    file: jsonFile,
+                    reason: "No matching element found",
+                    directory: directory.substring(directory.lastIndexOf('/') + 1)
+                });
             }
 
         } catch (error) {
-            console.error(`❌ Error processing ${jsonFile}:`, error.message);
+            const errorMsg = `Error processing ${jsonFile}: ${error.message}`;
+            console.error(`❌ ${errorMsg}`);
+            stats.errors.push({
+                file: jsonFile,
+                message: error.message,
+                directory: directory.substring(directory.lastIndexOf('/') + 1)
+            });
         }
     }
 }
@@ -56,6 +79,17 @@ class ExtractionEngine {
     extractData() {
         const extractedItems = [];
         const { baseDirectory, extraction, isNested } = this.config;
+        const startTime = Date.now();
+        
+        // Initialize processing statistics
+        const stats = {
+            filesProcessed: 0,
+            filesSkipped: [],
+            errors: [],
+            warnings: [],
+            missingFields: {},
+            defaultsApplied: {}
+        };
 
         try {
             if (isNested) {
@@ -68,13 +102,16 @@ class ExtractionEngine {
 
                 for (const subcategory of subcategoryFolders) {
                     const subcategoryPath = path.join(baseDirectory, subcategory);
-                    extractFromDirectory(extractedItems, subcategoryPath, extraction);
+                    extractFromDirectory(extractedItems, subcategoryPath, extraction, stats);
                 }
             } else {
                 // Extract from Jsons in the current dir
-                extractFromDirectory(extractedItems, baseDirectory, extraction)
+                extractFromDirectory(extractedItems, baseDirectory, extraction, stats)
             }
 
+            // Calculate processing time
+            const processingTime = ((Date.now() - startTime) / 1000).toFixed(2) + 's';
+            
             // Create versioned output with metadata
             const versionedData = {
                 metadata: {
@@ -82,7 +119,19 @@ class ExtractionEngine {
                     extractedAt: new Date().toISOString(),
                     itemType: this.config.itemType,
                     itemCount: extractedItems.length,
-                    gameDataPath: this.config.baseDirectory
+                    gameDataPath: this.config.baseDirectory,
+                    processingStats: {
+                        filesProcessed: stats.filesProcessed,
+                        filesSkipped: stats.filesSkipped,
+                        extractionErrors: stats.errors,
+                        validationWarnings: stats.warnings,
+                        processingTime: processingTime
+                    },
+                    extractionStats: {
+                        itemsWithMissingFields: Object.keys(stats.missingFields).length,
+                        missingFieldDetails: stats.missingFields,
+                        defaultsApplied: stats.defaultsApplied
+                    }
                 },
                 items: extractedItems
             };
