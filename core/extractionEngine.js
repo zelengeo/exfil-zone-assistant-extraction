@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { applyManualOverrides } = require('../config/manualOverrides');
-const { current: defaultVersion } = require('../config/version');
+const { current: defaultVersion } = require('../config/mainConfig');
 
 function extractFromDirectory(extractedItems, directory, extraction, stats) {
 

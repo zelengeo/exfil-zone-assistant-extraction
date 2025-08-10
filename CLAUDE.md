@@ -31,12 +31,11 @@ A configuration-driven extraction and transformation pipeline for game asset dat
 ├── core/
 │   └── extractionEngine.js    # Core extraction/transformation engine
 ├── transformed/                 # Output directory for transformed data
-│   ├── [item_type]_[version].json      # Final transformed data
+│   └── [item_type]_[version].json      # Final transformed data
 ├── extracted/                  # Output directory for extracted data
 │   └── [item_type]_[version].json       # Raw extracted data
 ├── tools/                     # Utility scripts (to be created)
-│   ├── versionCompare.js    # Compare data between versions
-│   └── applyOverrides.js    # Apply manual overrides to extracted data
+│   └── versionCompare.js    # Compare data between versions
 ├── .claudeignore             # Files/folders to ignore (to be created)
 └── extractionCLI.js          # Command-line interface
 
@@ -101,7 +100,7 @@ When working on this project, ignore these files/directories (add to `.claudeign
 Version tracking is now fully implemented with the following features:
 
 **Configuration:**
-- Version stored in `config/version.js` (update manually before extractions)
+- Version stored in `config/mainConfig.js` (update manually before extractions)
 - CLI override: `--version 1.2.3` for one-off extractions
 
 **File Structure:**
@@ -114,7 +113,7 @@ Version tracking is now fully implemented with the following features:
     - Current versioned files serve as baseline for comparison
 
 2. **After Game Update**
-    - Update `config/version.js` to new version
+    - Update `config/mainConfig.js` to new version
     - Run extraction pipeline: `node extractionCLI.js process-all`
     - Compare new versioned files with previous versions
     - Update manual overrides in `config/manualOverrides.js` as needed

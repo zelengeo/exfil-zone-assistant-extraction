@@ -1,4 +1,5 @@
 const {stringTable} = require("./stringTable")
+const {gameDataDirectory} = require("./mainConfig");
 
 const rarityMap = {
     "EWarfare_Quality::NewEnumerator0": "Common",
@@ -11,7 +12,7 @@ const rarityMap = {
 
 
 const configBase = {
-    baseDirectory: "D:/exfilzone_data/extracted/Exports/Contractors_Showdown/Content/Blueprints/GameModes/Warfare",
+    baseDirectory: gameDataDirectory,
     extractData: (element, data, fileName, directory, stats) => {
         const properties = element.Properties;
         const info = properties["warfare Prop Info"] || properties.Info || properties.Info_0;
@@ -19,14 +20,15 @@ const configBase = {
         
         // Track missing fields and defaults
         const trackMissing = (field, value, itemId) => {
-            if (!value) {
+            if (value === null || value === undefined) {
                 if (!stats.missingFields[field]) {
                     stats.missingFields[field] = [];
                 }
                 stats.missingFields[field].push(itemId);
             }
         };
-        
+
+        //FIXME do I need this? missing fields imply defaults are used
         const trackDefault = (field, value, defaultValue, itemId) => {
             if (!value) {
                 if (!stats.defaultsApplied[field]) {
