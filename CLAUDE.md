@@ -94,17 +94,40 @@ When working on this project, ignore these files/directories (add to `.claudeign
     - Document special cases or edge cases
     - Update this file with implementation status
 
-### Version Management Workflow
+### Version Management Workflow ✅ IMPLEMENTED
 
+Version tracking is now fully implemented with the following features:
+
+**Configuration:**
+- Version stored in `config/version.js` (update manually before extractions)
+- CLI override: `--version 1.2.3` for one-off extractions
+
+**File Structure:**
+- Extracted data: `extracted/extracted_[type]_data_v1.0.0.json`
+- Final data: `extracted/[type]_v1.0.0.json`
+- Both include metadata with version, timestamps, counts, and game data paths
+
+**Workflow:**
 1. **Before Game Update**
-    - Run `npm run snapshot` to save current extraction state
-    - Tag with game version number
+    - Current versioned files serve as baseline for comparison
 
 2. **After Game Update**
-    - Run full extraction pipeline
-    - Use version comparison tool to identify changes
-    - Review and update manual overrides as needed
-    - Document significant changes
+    - Update `config/version.js` to new version
+    - Run extraction pipeline: `node extractionCLI.js process-all`
+    - Compare new versioned files with previous versions
+    - Update manual overrides in `config/manualOverrides.js` as needed
+
+**Commands:**
+```bash
+# Use default version from config
+node extractionCLI.js process backpacks
+
+# Override version for testing
+node extractionCLI.js process backpacks --version 1.2.3-beta
+
+# Process all types with current version
+node extractionCLI.js process-all
+```
 
 ### Manual Override System ✅ IMPLEMENTED
 
@@ -138,7 +161,7 @@ const manualOverrides = {
 
 ### High Priority
 1. ✅ Create manual override system - COMPLETED
-2. Implement version tracking system
+2. ✅ Implement version tracking system - COMPLETED
 3. Complete food item extraction
 
 ### Medium Priority

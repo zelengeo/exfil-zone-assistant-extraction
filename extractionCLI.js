@@ -21,11 +21,14 @@ Commands:
   list-types         - Show available item types
   help              - Show this help message
 
+Options:
+  --version <ver>    - Override version (default from config/version.js)
+
 Available item types: ${this.availableTypes.join(', ')}
 
 Examples:
   node extractionCLI.js extract food
-  node extractionCLI.js process weapons
+  node extractionCLI.js process weapons --version 1.2.3
   node extractionCLI.js process-all
     `);
     }
@@ -52,31 +55,31 @@ Examples:
         return true;
     }
 
-    async extract(type) {
+    async extract(type, version = null) {
         if (!this.validateType(type)) return;
 
         const config = itemConfigs[type];
-        const engine = new ExtractionEngine(config);
+        const engine = new ExtractionEngine(config, version);
 
         console.log(`\n🔍 Extracting ${type} data...`);
         return engine.extractData();
     }
 
-    async transform(type) {
+    async transform(type, version = null) {
         if (!this.validateType(type)) return;
 
         const config = itemConfigs[type];
-        const engine = new ExtractionEngine(config);
+        const engine = new ExtractionEngine(config, version);
 
         console.log(`\n🔄 Transforming ${type} data...`);
         return engine.transformData();
     }
 
-    async process(type) {
+    async process(type, version = null) {
         if (!this.validateType(type)) return;
 
         const config = itemConfigs[type];
-        const engine = new ExtractionEngine(config);
+        const engine = new ExtractionEngine(config, version);
 
         console.log(`\n⚙️ Processing ${type} data...`);
         return engine.processAll();
@@ -121,6 +124,25 @@ Examples:
         return results;
     }
 
+    parseArgs(args) {
+        const result = { command: null, type: null, version: null };
+        
+        for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+            
+            if (arg === '--version' && i + 1 < args.length) {
+                result.version = args[i + 1];
+                i++; // Skip the version value
+            } else if (!result.command) {
+                result.command = arg;
+            } else if (!result.type) {
+                result.type = arg;
+            }
+        }
+        
+        return result;
+    }
+
     async run() {
         const args = process.argv.slice(2);
 
@@ -129,7 +151,7 @@ Examples:
             return;
         }
 
-        const [command, type] = args;
+        const { command, type, version } = this.parseArgs(args);
 
         switch (command) {
             case 'extract':
@@ -137,7 +159,7 @@ Examples:
                     console.error('❌ Please specify item type for extraction');
                     return;
                 }
-                await this.extract(type);
+                await this.extract(type, version);
                 break;
 
             case 'transform':
@@ -145,7 +167,7 @@ Examples:
                     console.error('❌ Please specify item type for transformation');
                     return;
                 }
-                await this.transform(type);
+                await this.transform(type, version);
                 break;
 
             case 'process':
@@ -153,7 +175,7 @@ Examples:
                     console.error('❌ Please specify item type for processing');
                     return;
                 }
-                await this.process(type);
+                await this.process(type, version);
                 break;
 
             case 'process-all':

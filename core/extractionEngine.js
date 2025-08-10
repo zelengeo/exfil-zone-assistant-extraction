@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { applyManualOverrides } = require('../config/manualOverrides');
+const { current: defaultVersion } = require('../config/version');
 
 function extractFromDirectory(extractedItems, directory, extraction) {
 
@@ -44,8 +45,9 @@ function extractFromDirectory(extractedItems, directory, extraction) {
 }
 
 class ExtractionEngine {
-    constructor(config) {
+    constructor(config, version = null) {
         this.config = config;
+        this.version = version || defaultVersion;
     }
 
     /**
@@ -73,10 +75,25 @@ class ExtractionEngine {
                 extractFromDirectory(extractedItems, baseDirectory, extraction)
             }
 
-            // Save the extracted data
-            const outputPath = path.join('./extracted', this.config.outputFile);
-            fs.writeFileSync(outputPath, JSON.stringify(extractedItems, null, 2));
-            console.log(`\n🎯 Extraction complete! Found ${extractedItems.length} ${this.config.category} items`);
+            // Create versioned output with metadata
+            const versionedData = {
+                metadata: {
+                    version: this.version,
+                    extractedAt: new Date().toISOString(),
+                    itemType: this.config.itemType,
+                    itemCount: extractedItems.length,
+                    gameDataPath: this.config.baseDirectory
+                },
+                items: extractedItems
+            };
+
+            // Save the extracted data with versioned filename
+            const baseFileName = this.config.outputFile;
+            const versionedFileName = `${baseFileName}_v${this.version}.json`;
+            const outputPath = path.join('./extracted', versionedFileName);
+            
+            fs.writeFileSync(outputPath, JSON.stringify(versionedData, null, 2));
+            console.log(`\n🎯 Extraction complete! Found ${extractedItems.length} ${this.config.itemType} items`);
             console.log(`📁 Data saved to: ${outputPath}`);
 
             return extractedItems;
@@ -94,9 +111,16 @@ class ExtractionEngine {
         // Load extracted data if not provided
         if (!extractedData) {
             try {
-                const extractedPath = path.join('./extracted/', this.config.outputFile);
+                // Try to load versioned extraction file first
+                const baseFileName = this.config.outputFile;
+                const versionedFileName = `${baseFileName}_v${this.version}.json`;
+                const extractedPath = path.join('./extracted', versionedFileName);
+                
                 const fileContent = fs.readFileSync(extractedPath, 'utf8');
-                extractedData = JSON.parse(fileContent);
+                const versionedData = JSON.parse(fileContent);
+                
+                // Extract the items array from versioned format
+                extractedData = versionedData.items || versionedData;
             } catch (error) {
                 console.error(`❌ Error loading extracted data: ${error.message}`);
                 return [];
@@ -136,9 +160,28 @@ class ExtractionEngine {
         // Apply manual overrides
         const itemsWithOverrides = applyManualOverrides(this.config.itemType, transformedItems);
 
-        // Save transformed data
-        const outputPath = path.join('./extracted/', this.config.finalOutputFile);
-        fs.writeFileSync(outputPath, JSON.stringify(itemsWithOverrides, null, 2));
+        // Create versioned output with metadata
+        const finalData = {
+            metadata: {
+                version: this.version,
+                transformedAt: new Date().toISOString(),
+                itemType: this.config.itemType,
+                itemCount: itemsWithOverrides.length,
+                gameDataPath: this.config.baseDirectory,
+                manualOverrides: itemsWithOverrides.length - transformedItems.length + 
+                    transformedItems.filter((item, index) => 
+                        JSON.stringify(item) !== JSON.stringify(itemsWithOverrides[index] || {})
+                    ).length
+            },
+            items: itemsWithOverrides
+        };
+
+        // Save transformed data with versioned filename
+        const baseFinalFileName = this.config.finalOutputFile;
+        const versionedFinalFileName = `${baseFinalFileName}_v${this.version}.json`;
+        const outputPath = path.join('./transformed/', versionedFinalFileName);
+        
+        fs.writeFileSync(outputPath, JSON.stringify(finalData, null, 2));
 
         console.log(`✅ Successfully transformed ${itemsWithOverrides.length} ${this.config.itemType} items`);
         console.log(`📁 Output saved to: ${outputPath}`);

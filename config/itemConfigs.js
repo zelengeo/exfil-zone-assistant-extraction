@@ -45,8 +45,8 @@ const configBase = {
 const itemConfigs = {
     food: {
         baseDirectory: './food-data',
-        outputFile: 'extracted_food_data.json',
-        finalOutputFile: 'food.json',
+        outputFile: 'food_data',
+        finalOutputFile: 'food',
         category: 'provisions',
         itemType: 'provisions',
 
@@ -105,8 +105,8 @@ const itemConfigs = {
 
     holsters: {
         baseDirectory: configBase.baseDirectory + '/TecVest',
-        outputFile: 'extracted_holster_data.json',
-        finalOutputFile: 'holsters.json',
+        outputFile: 'holster_data',
+        finalOutputFile: 'holsters',
         category: 'gear',
         itemType: 'holsters',
 
@@ -202,8 +202,8 @@ const itemConfigs = {
 
     backpacks: {
         baseDirectory: configBase.baseDirectory + '/Backpack',
-        outputFile: 'extracted_backpacks_data.json',
-        finalOutputFile: 'backpacks.json',
+        outputFile: 'backpacks_data',
+        finalOutputFile: 'backpacks',
         category: 'gear',
         itemType: 'backpacks',
 
@@ -357,8 +357,8 @@ const itemConfigs = {
 
     keys: {
         baseDirectory: configBase.baseDirectory + '/House',
-        outputFile: 'extracted_key_data.json',
-        finalOutputFile: 'keys.json',
+        outputFile: 'keys_data',
+        finalOutputFile: 'keys',
         category: 'keys',
         itemType: 'keys',
 
@@ -482,11 +482,12 @@ const itemConfigs = {
     weapons: {
         baseDirectory: './weapon-data',
         outputFile:
-            'extracted_weapon_data.json',
+            'weapon_data',
         finalOutputFile:
-            'weapons.json',
+            'weapons',
         category:
             'weapons',
+        itemType: 'weapons',
         // ... weapon-specific configuration
     }
     ,
@@ -494,11 +495,12 @@ const itemConfigs = {
     ammo: {
         baseDirectory: './ammo-data',
         outputFile:
-            'extracted_ammo_data.json',
+            'ammo_data',
         finalOutputFile:
-            'ammo.json',
+            'ammo',
         category:
             'ammo',
+        itemType: 'ammo',
         // ... ammo-specific configuration
     }
 }
