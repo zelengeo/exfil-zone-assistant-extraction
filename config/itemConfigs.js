@@ -1,5 +1,6 @@
 const {stringTable} = require("./stringTable")
 const {gameDataDirectory} = require("./mainConfig");
+const {getLegacyId} = require("./legacyIdMappings");
 
 const rarityMap = {
     "EWarfare_Quality::NewEnumerator0": "Common",
@@ -571,6 +572,159 @@ const itemConfigs = {
         // ... weapon-specific configuration
     }
     ,
+
+    armor: {
+        baseDirectory: configBase.baseDirectory + '/TecVest',
+        outputFile: 'armor_data',
+        finalOutputFile: 'armor',
+        category: 'gear',
+        itemType: 'armor',
+
+        // Extraction configuration
+        extraction: {
+            findElement: (data, fileName) => data.find(item =>
+                item.Type && item.Type.startsWith(fileName) && !fileName.includes("VestHolster")
+            ),
+
+            extractData: (element, data, fileName, directory, stats) => {
+                const extractedData = {
+                    ...configBase.extractData(element, data, fileName, directory, stats),
+                    subcategory: "Body Armor"
+                };
+
+                const itemId = fileName;
+                const properties = element.Properties;
+
+                // Extract protective data (body parts coverage)
+                if (properties.ProtectiveData && Array.isArray(properties.ProtectiveData)) {
+                    extractedData.protectiveData = properties.ProtectiveData.map(item => ({
+                        bodyPart: item.BoneName_4_5198B4F8421FF8853C742DA2F94FA506,
+                        armorClass: item.AntiPenetration_7_9EB8527E43E64D022DC398AA88F456BF,
+                        bluntDamageScalar: item.BluntDamageScalar_9_7D4D7D2D4924710ECEE9D9902B6F4674,
+                        protectionAngle: item.ProtectionAngle_25_1D2DE9154DB5426696A9EAB37F1D7A38
+                    }));
+                } else {
+                    if (!stats.missingFields['protectiveData']) stats.missingFields['protectiveData'] = [];
+                    stats.missingFields['protectiveData'].push(itemId);
+                }
+
+                // Extract armor class display value
+                extractedData.antiPenetrationDisplay = properties.AntiPenetrationDisplay || null;
+                if (!properties.AntiPenetrationDisplay) {
+                    if (!stats.missingFields['antiPenetrationDisplay']) stats.missingFields['antiPenetrationDisplay'] = [];
+                    stats.missingFields['antiPenetrationDisplay'].push(itemId);
+                }
+
+                // Extract blunt damage scalar display
+                extractedData.bluntDamageScalarDisplay = properties.BluntDamageScalarDisplay || null;
+                if (!properties.BluntDamageScalarDisplay) {
+                    if (!stats.missingFields['bluntDamageScalarDisplay']) stats.missingFields['bluntDamageScalarDisplay'] = [];
+                    stats.missingFields['bluntDamageScalarDisplay'].push(itemId);
+                }
+
+                // Extract durability properties
+                extractedData.maxDurability = properties.MaxDurability || null;
+                if (!properties.MaxDurability) {
+                    if (!stats.missingFields['maxDurability']) stats.missingFields['maxDurability'] = [];
+                    stats.missingFields['maxDurability'].push(itemId);
+                }
+
+                extractedData.durabilityDamageScalar = properties.DurabilityDamageScalar || null;
+                if (!properties.DurabilityDamageScalar) {
+                    if (!stats.missingFields['durabilityDamageScalar']) stats.missingFields['durabilityDamageScalar'] = [];
+                    stats.missingFields['durabilityDamageScalar'].push(itemId);
+                }
+
+                // Extract curve data for penetration mechanics
+                const extractCurveData = (curveProperty, fieldName) => {
+                    if (curveProperty?.EditorCurveData?.Keys) {
+                        return curveProperty.EditorCurveData.Keys.map(item => ({
+                            interpMode: item.InterpMode.substring(5).toLowerCase(),
+                            tangentMode: item.TangentMode.substring(5).toLowerCase(),
+                            time: item.Time,
+                            value: item.Value,
+                            arriveTangent: item.ArriveTangent,
+                            leaveTangent: item.LeaveTangent
+                        }));
+                    } else {
+                        if (!stats.missingFields[fieldName]) stats.missingFields[fieldName] = [];
+                        stats.missingFields[fieldName].push(itemId);
+                        return null;
+                    }
+                };
+
+                extractedData.penetrationChanceCurve = extractCurveData(properties.PenetrationChanceCurve, 'penetrationChanceCurve');
+                extractedData.penetrationDamageScalarCurve = extractCurveData(properties.PenetrationDamageScalarCurve, 'penetrationDamageScalarCurve');
+                extractedData.antiPenetrationDurabilityScalarCurve = extractCurveData(properties.AntiPenetrationDurabilityScalarCurve, 'antiPenetrationDurabilityScalarCurve');
+
+                return extractedData;
+            }
+        },
+
+        // Transformation configuration
+        transformation: {
+            generateId: (itemData) => {
+                // Check for legacy ID mapping first
+                const legacyId = getLegacyId('armor', itemData.sourceFile);
+                if (legacyId) {
+                    return legacyId;
+                }
+                
+                // Default ID generation logic
+                let idBase = itemData.sourceFile;
+                const lastPart = idBase.replace(".json", "").replaceAll("'", "");
+
+                // Remove the '_C' suffix if it exists
+                const withoutC = lastPart.endsWith('_C') ? lastPart.slice(0, -2) : lastPart;
+
+                // Extract meaningful part from armor naming convention
+                let armorName;
+                if (withoutC.includes('WarfareTecVest_')) {
+                    armorName = withoutC.replace('WarfareTecVest_', '');
+                } else if (withoutC.includes('TecVest_')) {
+                    armorName = withoutC.replace('TecVest_', '');
+                } else {
+                    // Fallback to the last part after underscore
+                    armorName = withoutC.substring(withoutC.lastIndexOf('_') + 1);
+                }
+
+                return `armor_${armorName.replaceAll(".", "").toLowerCase()}`;
+            },
+
+            mapToFinalFormat: (itemData) => ({
+                id: itemData.id,
+                name: itemData.displayName,
+                description: "",
+                category: "gear",
+                subcategory: itemData.subcategory,
+                images: {
+                    icon: `/images/items/armor/${itemData.icon}.webp`,
+                    thumbnail: `/images/items/armor/${itemData.icon}.webp`,
+                    fullsize: `/images/items/armor/${itemData.icon}.webp`
+                },
+                stats: {
+                    price: itemData.price || 50000,
+                    weight: itemData.weight || 5.0,
+                    rarity: itemData.rarity || "Common",
+                    armorClass: itemData.antiPenetrationDisplay,
+                    maxDurability: itemData.maxDurability,
+                    durabilityDamageScalar: itemData.durabilityDamageScalar,
+                    bluntDamageScalar: itemData.bluntDamageScalarDisplay,
+                    protectiveData: itemData.protectiveData || [],
+                    penetrationChanceCurve: itemData.penetrationChanceCurve || [],
+                    penetrationDamageScalarCurve: itemData.penetrationDamageScalarCurve || [],
+                    antiPenetrationDurabilityScalarCurve: itemData.antiPenetrationDurabilityScalarCurve || []
+                },
+                tips: ''
+            }),
+
+            requiredAttributes: [
+                ...configBase.requiredAttributes,
+                'stats.armorClass', 'stats.maxDurability', 'stats.durabilityDamageScalar',
+                'stats.bluntDamageScalar', 'stats.protectiveData'
+            ]
+        }
+    },
 
     ammo: {
         baseDirectory: './ammo-data',

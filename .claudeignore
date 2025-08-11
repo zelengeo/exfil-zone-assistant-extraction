@@ -3,4 +3,5 @@ transformed/
 collectedData/
 node_modules/
 config/stringTable.js
+temp/
 *.log
