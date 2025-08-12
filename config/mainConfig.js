@@ -1,6 +1,6 @@
 module.exports = {
     // Current game version - update this when game updates
-    current: " 1.3.14.0-test",
+    current: " 1.3.14.0-test.1",
     gameDataDirectory: "D:/exfilzone_data/extracted/Exports/Contractors_Showdown/Content/Blueprints/GameModes/Warfare"
     
     // Future: Could add additional version-related metadata

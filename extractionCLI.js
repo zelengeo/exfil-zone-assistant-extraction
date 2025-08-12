@@ -24,6 +24,11 @@ Commands:
 Options:
   --version <ver>    - Override version (default from config/version.js)
 
+Template Inheritance:
+  When enabled in item configs, missing properties are inherited from template items
+  within the same category. Inheritance statistics are included in extraction metadata.
+  Currently enabled for: armor
+
 Available item types: ${this.availableTypes.join(', ')}
 
 Examples:

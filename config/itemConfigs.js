@@ -18,7 +18,7 @@ const configBase = {
         const properties = element.Properties;
         const info = properties["warfare Prop Info"] || properties.Info || properties.Info_0;
         const itemId = fileName;
-        
+
         // Track missing fields and defaults
         const trackMissing = (field, value, itemId) => {
             if (value === null || value === undefined) {
@@ -40,12 +40,12 @@ const configBase = {
             }
             return value;
         };
-        
+
         const iconObjectPath = info["Icon_11_BA1E5C224783410CB10781B70CE5A463"]?.ObjectPath;
         const displayName = info["DisplayName_2_E87F8CE0471A0D0F627BBA9F7E5EE752"];
         const rarity = info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"] ? rarityMap[info["Quality_8_A8290BF9475A0928D1614B82C6FDBFF4"]] : null;
         const subcategory = directory.substring(directory.lastIndexOf('/') + 1);
-        
+
         // Track missing fields
         trackMissing('icon', iconObjectPath, itemId);
         trackMissing('displayName', displayName, itemId);
@@ -55,7 +55,7 @@ const configBase = {
         return {
             sourceFile: `${fileName}.json`,
             type: element.Type,
-            template: element.Template.ObjectPath,
+            template: element.Template?.ObjectPath,
             name: element.Name,
             displayName: displayName ? displayName.LocalizedString : null,
             icon: iconObjectPath ? iconObjectPath.substring(iconObjectPath.lastIndexOf('/') + 1).split('.')[0] : null,
@@ -70,7 +70,12 @@ const configBase = {
         'images.icon', 'images.thumbnail', 'images.fullsize',
         'stats.rarity', 'stats.price', 'stats.weight',
         'tips'
+    ],
+
+    inheritableAttributes: [
+        'rarity', 'weight'
     ]
+
 }
 
 const itemConfigs = {
@@ -83,6 +88,8 @@ const itemConfigs = {
 
         // Extraction configuration
         extraction: {
+            shouldSkipFile: (fileName) => false,
+
             findElement: (data, fileName) => data.find(item =>
                 item.Type && item.Type.startsWith(fileName)
             ),
@@ -90,7 +97,7 @@ const itemConfigs = {
             extractData: (element, data, fileName, directory, stats) => {
                 const properties = element.Properties;
                 const itemId = fileName;
-                
+
                 // Track missing fields for food-specific properties
                 if (!properties.Capacity) {
                     if (!stats.missingFields['capacity']) stats.missingFields['capacity'] = [];
@@ -112,7 +119,7 @@ const itemConfigs = {
                     if (!stats.missingFields['hydraFactor']) stats.missingFields['hydraFactor'] = [];
                     stats.missingFields['hydraFactor'].push(itemId);
                 }
-                
+
                 return {
                     ...configBase.extractData(element, data, fileName, directory, stats),
                     capacity: properties.Capacity || null,
@@ -168,8 +175,10 @@ const itemConfigs = {
 
         // Extraction configuration
         extraction: {
+            shouldSkipFile: (fileName) => !fileName.includes("VestHolster"),
+
             findElement: (data, fileName) => data.find(item =>
-                fileName.includes("VestHolster") && item.Type && item.Type.startsWith(fileName)
+                item.Type && item.Type.startsWith(fileName)
             ),
 
             extractData: (element, data, fileName, directory, stats) => {
@@ -192,7 +201,7 @@ const itemConfigs = {
                 }
                 if (totalWidth) {
                     extractedData.content = element.Properties.PropInfo.map(prop => ({
-                        [prop.Key]: Math.floor(totalWidth/(prop.Value.HalfWidth_42_152E25204555C2CC1D55A79BE2F930F1*2))
+                        [prop.Key]: Math.floor(totalWidth / (prop.Value.HalfWidth_42_152E25204555C2CC1D55A79BE2F930F1 * 2))
                     }))
                 } else {
                     // Track missing totalWidth
@@ -275,6 +284,8 @@ const itemConfigs = {
 
         // Extraction configuration
         extraction: {
+            shouldSkipFile: (fileName) => false,
+
             findElement: (data, fileName) => data.find(item =>
                 item.Type && item.Type.startsWith(fileName)
             ),
@@ -445,6 +456,8 @@ const itemConfigs = {
 
         // Extraction configuration
         extraction: {
+            shouldSkipFile: (fileName) => false,
+
             findElement: (data, fileName) => data.find(item =>
                 item.Type && item.Type.startsWith(fileName)
             ),
@@ -582,8 +595,10 @@ const itemConfigs = {
 
         // Extraction configuration
         extraction: {
+            shouldSkipFile: (fileName) => fileName.includes("VestHolster"),
+
             findElement: (data, fileName) => data.find(item =>
-                item.Type && item.Type.startsWith(fileName) && !fileName.includes("VestHolster")
+                item.Type && item.Type.startsWith(fileName)
             ),
 
             extractData: (element, data, fileName, directory, stats) => {
@@ -658,7 +673,15 @@ const itemConfigs = {
                 extractedData.antiPenetrationDurabilityScalarCurve = extractCurveData(properties.AntiPenetrationDurabilityScalarCurve, 'antiPenetrationDurabilityScalarCurve');
 
                 return extractedData;
-            }
+            },
+            inheritableAttributes: [
+                ...configBase.inheritableAttributes,
+                'maxDurability',
+                'durabilityDamageScalar', 'antiPenetrationDisplay',
+                'bluntDamageScalarDisplay', 'protectiveData',
+                'penetrationChanceCurve', 'penetrationDamageScalarCurve',
+                'antiPenetrationDurabilityScalarCurve'
+            ],
         },
 
         // Transformation configuration
@@ -669,7 +692,7 @@ const itemConfigs = {
                 if (legacyId) {
                     return legacyId;
                 }
-                
+
                 // Default ID generation logic
                 let idBase = itemData.sourceFile;
                 const lastPart = idBase.replace(".json", "").replaceAll("'", "");

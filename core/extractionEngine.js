@@ -16,6 +16,14 @@ function extractFromDirectory(extractedItems, directory, extraction, stats) {
         const fileName = path.basename(jsonFile, '.json');
 
         stats.filesProcessed++;
+        if (extraction.shouldSkipFile(fileName)) {
+            stats.filesSkipped.push({
+                file: jsonFile,
+                reason: "Intentionally skipped",
+                directory: directory.substring(directory.lastIndexOf('/') + 1)
+            });
+            continue;
+        }
 
         try {
             const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -74,6 +82,132 @@ class ExtractionEngine {
     }
 
     /**
+     * Template inheritance resolution for extracted items
+     * @param {Array} extractedItems - Array of extracted items
+     * @param {Object} stats - Statistics object to track inheritance
+     * @returns {Array} - Items with resolved inheritance
+     */
+    resolveInheritance(extractedItems, stats) {
+        // Check if inheritance is enabled for this item type
+        if (!this.config.extraction.inheritableAttributes?.length) {
+            return extractedItems;
+        }
+
+        console.log(`🔗 Resolving template inheritance for ${extractedItems.length} items...`);
+
+        // Initialize inheritance statistics
+        const inheritanceStats = {
+            itemsWithInheritance: 0,
+            fieldsInherited: {},
+            inheritedFieldsCount: {},
+            orphanedTemplates: [],
+            templateResolutionErrors: []
+        };
+
+        // Build template lookup map - map template basenames to actual items
+        const templateLookup = new Map();
+        extractedItems.forEach(item => {
+            const baseName = item.sourceFile.replace('.json', '');
+            templateLookup.set(baseName, item);
+        });
+
+        // Process each item for inheritance
+        extractedItems.forEach(item => {
+            if (!item.template) return;
+
+            // Extract template basename from full path
+            // e.g., "Contractors_Showdown/Content/.../WarfareTecVest.47" -> "WarfareTecVest"
+            const templatePath = item.template.split('/').pop(); // Get "WarfareTecVest.47"
+            const templateBaseName = templatePath.split('.')[0]; // Get "WarfareTecVest"
+            
+            // Find the template item by matching basename
+            const templateItem = templateLookup.get(templateBaseName);
+            
+            if (!templateItem) {
+                // Template not found - add to orphaned templates
+                if (!inheritanceStats.orphanedTemplates.includes(item.template)) {
+                    inheritanceStats.orphanedTemplates.push(item.template);
+                }
+                return;
+            }
+
+            // Skip self-inheritance (shouldn't happen with proper template references)
+            if (templateItem === item) return;
+
+            // Track inherited fields for this item
+            const inheritedFieldsForItem = [];
+
+            // Get inheritable attributes from config
+            const inheritableAttributes = this.config.extraction.inheritableAttributes;
+
+            // Copy missing properties from template
+            inheritableAttributes.forEach(field => {
+                if ((item[field] === null || item[field] === undefined) && 
+                    (templateItem[field] !== null && templateItem[field] !== undefined)) {
+                    
+                    // Deep copy for complex objects (arrays, objects)
+                    if (typeof templateItem[field] === 'object' && templateItem[field] !== null) {
+                        item[field] = JSON.parse(JSON.stringify(templateItem[field]));
+                    } else {
+                        item[field] = templateItem[field];
+                    }
+                    
+                    inheritedFieldsForItem.push(field);
+                    
+                    // Track fields inherited in attribute:[items] format
+                    if (!inheritanceStats.fieldsInherited[field]) {
+                        inheritanceStats.fieldsInherited[field] = [];
+                    }
+                    const itemName = item.sourceFile ? item.sourceFile.replace('.json', '') : (item.id || item.name);
+                    inheritanceStats.fieldsInherited[field].push(itemName);
+                }
+            });
+
+            // Update inheritance statistics
+            if (inheritedFieldsForItem.length > 0) {
+                inheritanceStats.itemsWithInheritance++;
+                inheritanceStats.inheritedFieldsCount[item.sourceFile || item.id || item.name] = inheritedFieldsForItem.length;
+                console.log(`  ✓ ${item.sourceFile}: inherited ${inheritedFieldsForItem.join(', ')} from ${templateBaseName}`);
+            }
+        });
+
+        //TODO POTENTIAL ISSUE - INHERITING FROM PARENT WHICH DIDN'T YET INHERITED VALUES ITSELF
+
+        // Remove inherited items from missing fields lists
+        Object.keys(inheritanceStats.fieldsInherited).forEach(field => {
+            if (stats.missingFields[field]) {
+                const inheritedItems = inheritanceStats.fieldsInherited[field];
+                inheritedItems.forEach(itemName => {
+                    const index = stats.missingFields[field].indexOf(itemName);
+                    if (index > -1) {
+                        stats.missingFields[field].splice(index, 1);
+                        console.log(`  🔄 Removed ${itemName} from missing '${field}' list (inherited)`);
+                    }
+                });
+                
+                // Remove the field entirely if no items are missing it anymore
+                if (stats.missingFields[field].length === 0) {
+                    delete stats.missingFields[field];
+                    console.log(`  ✨ Field '${field}' no longer has missing items after inheritance`);
+                }
+            }
+        });
+
+        // Add inheritance stats to main stats object
+        stats.inheritanceStats = inheritanceStats;
+
+        console.log(`🔗 Inheritance resolution complete: ${inheritanceStats.itemsWithInheritance} items inherited fields`);
+        if (inheritanceStats.orphanedTemplates.length > 0) {
+            console.log(`⚠ ${inheritanceStats.orphanedTemplates.length} orphaned templates found:`);
+            inheritanceStats.orphanedTemplates.forEach(template => {
+                console.log(`  - ${template}`);
+            });
+        }
+
+        return extractedItems;
+    }
+
+    /**
      * Generic extraction method that works for any item type
      */
     extractData() {
@@ -107,6 +241,9 @@ class ExtractionEngine {
                 // Extract from Jsons in the current dir
                 extractFromDirectory(extractedItems, baseDirectory, extraction, stats)
             }
+
+            // Resolve template inheritance after all items are loaded
+            this.resolveInheritance(extractedItems, stats);
             
             // Create versioned output with metadata
             const versionedData = {
@@ -126,7 +263,8 @@ class ExtractionEngine {
                         itemsWithMissingFields: Object.keys(stats.missingFields).length,
                         missingFieldDetails: stats.missingFields,
                         defaultsApplied: stats.defaultsApplied
-                    }
+                    },
+                    inheritanceStats: stats.inheritanceStats || null
                 },
                 items: extractedItems
             };
