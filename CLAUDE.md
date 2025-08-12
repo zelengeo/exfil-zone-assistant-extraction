@@ -52,16 +52,16 @@ When working on this project, ignore these files/directories (add to `.claudeign
 
 ## Current Implementation Status
 
-### ✅ Implemented Item Types (3/10)
+### ✅ Implemented Item Types (4/10)
 - **holsters**: Tactical vest attachments
 - **backpacks**: Storage containers
 - **keys**: Access cards/keys
+- **armor**: Body armor and helmets (with template inheritance)
 
-### 🔄 Pending Item Types (7/10)
+### 🔄 Pending Item Types (6/10)
 - **food**: Consumables (partially configured, needs completion)
 - **weapons**: Firearms and melee weapons
 - **ammo**: Ammunition types
-- **armor**: Body armor and helmets
 - **medical**: Medical supplies
 - **throwables**: Grenades and throwables
 - **attachments**: Weapon attachments
@@ -81,6 +81,7 @@ When working on this project, ignore these files/directories (add to `.claudeign
     - Define extraction logic (`findElement`, `extractData`)
     - Define transformation logic (`generateId`, `mapToFinalFormat`)
     - Specify required attributes and validation rules
+    - Configure `inheritableAttributes` if items use template inheritance
 
 3. **Testing Phase**
     - Test with `node extractionCLI.js extract <type>`
@@ -231,13 +232,72 @@ node extractionCLI.js transform backpacks --version game-v1.2.3
 node extractionCLI.js process backpacks --version game-v1.2.3
 ```
 
+### Template Inheritance System ✅ IMPLEMENTED
+
+The template inheritance system automatically resolves missing data by inheriting values from parent templates, crucial for game items that use template-based architecture.
+
+**How It Works:**
+- Items reference template files via `template` field in their JSON data
+- Missing or null fields are automatically filled from the referenced template
+- Inheritance occurs during extraction phase, before transformation
+- Only fields defined in `inheritableAttributes` config are inherited
+- Deep copying ensures complex objects (arrays, nested objects) are properly inherited
+
+**Configuration:**
+```javascript
+// In itemConfigs.js
+armor: {
+  extraction: {
+    inheritableAttributes: [
+      'rarity', 'weight', 'maxDurability', 'durabilityDamageScalar',
+      'antiPenetrationDisplay', 'bluntDamageScalarDisplay', 'protectiveData',
+      'penetrationChanceCurve', 'penetrationDamageScalarCurve',
+      'antiPenetrationDurabilityScalarCurve'
+    ],
+    // ... other extraction config
+  }
+}
+```
+
+**Inheritance Metadata:**
+```json
+{
+  "inheritanceStats": {
+    "itemsWithInheritance": 8,
+    "fieldsInherited": {
+      "maxDurability": ["WarfareTecVest_Heavy", "WarfareTecVest_Light"],
+      "protectiveData": ["WarfareTecVest_Basic"]
+    },
+    "inheritedFieldsCount": {
+      "WarfareTecVest_Heavy": 3,
+      "WarfareTecVest_Light": 2
+    },
+    "orphanedTemplates": ["/Game/Templates/MissingTemplate"],
+    "templateResolutionErrors": []
+  }
+}
+```
+
+**Key Features:**
+- **Missing Field Resolution**: Inherited fields are removed from `missingFields` tracking
+- **Template Validation**: Tracks orphaned templates (referenced but not found)
+- **Inheritance Tracking**: Detailed statistics on what was inherited from where
+- **Self-Inheritance Prevention**: Prevents items from inheriting from themselves
+- **Deep Copy Support**: Safely copies complex nested data structures
+
+**Benefits:**
+- **Reduced Manual Overrides**: Less need for manual data fixes when templates provide values
+- **Data Completeness**: Automatic resolution of missing fields where templates exist
+- **Template Dependency Tracking**: Visibility into template relationships and missing dependencies
+- **Quality Assurance**: Clear reporting on inheritance success and failure cases
+
 ## Development Tasks Priority
 
 ### High Priority
 1. ✅ Create manual override system - COMPLETED
 2. ✅ Implement version tracking system - COMPLETED
 3. ✅ Enhanced metadata system (missing fields, processing stats) - COMPLETED
-4. Implement armor extraction
+4. ✅ Implement armor extraction with template inheritance - COMPLETED
 
 ### Medium Priority
 1. Implement remaining extraction
